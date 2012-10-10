@@ -6,13 +6,13 @@ from flask import Flask, render_template, request, Response
 import redis
 
 app = Flask( __name__ )
-red = redis.StrictRedis( unix_socket_path = './redis/redis.sock' )
+red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
 
 @app.route( '/post/<channel>/<kind>', methods = [ 'POST' ] )
 def post( channel, kind ):
 	ip = request.remote_addr
 	message = request.form[ 'message' ]
-	now = datetime.datetime.now().replace(microsecond=0).time().isoformat()
+	now = datetime.datetime.now().replace( microsecond = 0).time().isoformat()
 	if ( kind != 'html' ):
 		message = escape( message )
 	if ( kind == 'text' ):
@@ -38,7 +38,8 @@ def stream( channel ):
 
 @app.route('/s/<room>/<uid>')
 def student( room, uid ):
-	return render_template( 'student.html', room = room, student = uid )
+	student = red.get( 'student:{0}'.format( uid ) )
+	return render_template( 'student.html', room = room, student = student )
 
 @app.route('/t/<room>')
 def teacher( room ):

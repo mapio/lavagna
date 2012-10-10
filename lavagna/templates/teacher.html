@@ -6,16 +6,15 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		<script>
 			function post_hint( e ) {
-				var hint = $( '#hint' ).val();
 				var kind = $( '#kind' ).val();
+				var hint = $( '#hint' ).val();
 				if ( hint != '' ) $.post( '/post/hints/' + kind, { 'message': hint } );
 				$( '#hint' ).val( '' );
 			}
 			$( document ).ready( function () {
-				var questions = document.getElementById( 'questions' );
 				var source = new EventSource( '/stream/questions' );
 				source.onmessage = function( e ) {
-					questions.innerHTML = e.data + '\n' + questions.innerHTML;
+					$( '#questions' ).after( e.data );
 				};
 			} );
 		</script>
@@ -27,16 +26,12 @@
 			<textarea rows=4 cols=80 id="hint"></textarea>
 			<select id="kind">
 				<option selected>text</option>
-				<option html>html</option>
-				<option html>code</option>
+				<option>code</option>
+				<option>html</option>
 			</select>
-			<button type="button" onclick="post_hint(); return false;">Post hint</button>
+			<button type="button" onclick="post_hint(); return false;">Post</button>
 		</form>
 		
-		
-
-
-		<p>Questions:</p>
-		<div id="questions"></div>
+		<p id="questions">Questions:</p>
 	</body>
 </html>

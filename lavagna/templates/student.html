@@ -7,18 +7,16 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		<script>
 			$( document ).ready( function () {
-				var hints = document.getElementById( 'hints' );
 				var source = new EventSource( '/stream/hints' );
 				source.onmessage = function( e ) {
-					console.log( e.data );
-					hints.innerHTML = e.data + '\n' + hints.innerHTML;
+					$( '#hints' ).after( e.data );
 					prettyPrint();
 				};
 				$( '#question' ).keyup( function( e ) {
 					if ( e.keyCode == 13 ) {
-						var question = $(this).val();
+						var question = $( this ).val();
 						if ( question != '' ) $.post( '/post/questions/text', { 'message': question } );
-						$(this).val( '' );
+						$( this ).val( '' );
 					}
 				} );
 			} );
@@ -27,7 +25,6 @@
 	<body>
 		<p>Room: <b>{{ room }}</b>, student: <b>{{ student }}</b></p>
 		<p>Question: <input id="question" size=120/></p>
-		<p>Hints:</p>
-		<div id="hints"></div>
+		<p id="hints">Hints:</p>
 	</body>
 </html>
