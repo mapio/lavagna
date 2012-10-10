@@ -9,8 +9,10 @@ elif [ "$1" == "status" ]; then
 	redis-cli  -s ./data/redis.sock info | grep uptime
 else
 	if [ -r ./data/redis.pid ]; then
+		tail -n 0 -f ./data/redis.log & pid=$!
 		kill $(cat ./data/redis.pid)
-		tail -n 1 ./data/redis.log
+		sleep 1
+		kill $pid
 	else
 		echo 'no pidfile present'
 	fi
