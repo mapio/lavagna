@@ -9,6 +9,7 @@
 				var hints = document.getElementById( 'hints' );
 				var source = new EventSource( '/stream/hints' );
 				source.onmessage = function( e ) {
+					console.log( e.data );
 					hints.innerHTML = e.data + '\n' + hints.innerHTML;
 				};
 				$( '#question' ).keyup( function( e ) {

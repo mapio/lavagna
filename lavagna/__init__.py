@@ -21,7 +21,9 @@ def stream( kind ):
 		pubsub.subscribe( kind )
 		for message in pubsub.listen():
 			if message[ 'type' ] != 'message': continue
-			yield 'data: %s\n\n' % message[ 'data' ]	
+			for line in message[ 'data' ].split( '\n' ):
+				yield 'data: {0}\n'.format( line )
+			yield '\n\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
 
 @app.route('/s/<room>/<uid>')

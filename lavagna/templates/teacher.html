@@ -5,25 +5,23 @@
 		<link href="{{ url_for( 'static', filename='lavagna.css' ) }}" type="text/css" rel="stylesheet">
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		<script>
+			function post_hint( e ) {
+				$.post( '/post/hints', { 'message': $( '#hint' ).val() } );
+				$( '#hint' ).val( '' );
+			}
 			$( document ).ready( function () {
 				var questions = document.getElementById( 'questions' );
 				var source = new EventSource( '/stream/questions' );
 				source.onmessage = function( e ) {
 					questions.innerHTML = e.data + '\n' + questions.innerHTML;
 				};
-				$( '#hint' ).keyup( function( e ) {
-					if ( e.keyCode == 13 ) {
-						$.post( '/post/hints', { 'message': $(this).val() } );
-						console.log( $(this).val() );
-						$(this).val( '' );
-					}
-				} );
 			} );
 		</script>
 	</head>
 	<body>
 		<p>Hint:</p>
-		<input id="hint" />
+		<textarea rows=4 cols=80 id="hint"></textarea>
+		<button type="button" onclick="post_hint(); return false;">Post hint</button>
 		<p>Questions:</p>
 		<div id="questions"></div>
 	</body>
