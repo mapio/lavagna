@@ -1,30 +1,22 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-	<head>
-		<title>Lavagna</title>
-		<link href="{{ url_for( 'static', filename='lavagna.css' ) }}" type="text/css" rel="stylesheet">
-		<script src="{{ url_for( 'static', filename='pp.js' ) }}"></script>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-		<script>
-			$( document ).ready( function () {
-				var source = new EventSource( '/stream/hints' );
-				source.onmessage = function( e ) {
-					$( '#hints' ).after( e.data );
-					prettyPrint();
-				};
-				$( '#question' ).keyup( function( e ) {
-					if ( e.keyCode == 13 ) {
-						var question = $( this ).val();
-						if ( question != '' ) $.post( '/post/questions/text', { 'message': question } );
-						$( this ).val( '' );
-					}
-				} );
-			} );
-		</script>
-	</head>
-	<body>
-		<p>Room: <b>{{ room }}</b>, student: <b>{{ student }}</b></p>
-		<p>Question: <input id="question" size=120/></p>
-		<p id="hints">Hints:</p>
-	</body>
-</html>
+{% extends "layout.html" %}
+{% block script %}
+$( document ).ready( function () {
+	var source = new EventSource( '/stream/hints' );
+	source.onmessage = function( e ) {
+		$( '#hints' ).after( e.data );
+		prettyPrint();
+	};
+	$( '#question' ).keyup( function( e ) {
+		if ( e.keyCode == 13 ) {
+			var question = $( this ).val();
+			if ( question != '' ) $.post( '/post/questions/text', { 'message': question } );
+			$( this ).val( '' );
+		}
+	} );
+} );
+{% endblock %}
+{% block body %}
+	<p>Room: <b>{{ room }}</b>, student: <b>{{ student }}</b></p>
+	<p>Question: <input id="question" size=120/></p>
+	<p id="hints">Hints:</p>
+{% endblock %}

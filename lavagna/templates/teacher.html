@@ -1,37 +1,28 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-	<head>
-		<title>Lavagna</title>
-		<link href="{{ url_for( 'static', filename='lavagna.css' ) }}" type="text/css" rel="stylesheet">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-		<script>
-			function post_hint( e ) {
-				var kind = $( '#kind' ).val();
-				var hint = $( '#hint' ).val();
-				if ( hint != '' ) $.post( '/post/hints/' + kind, { 'message': hint } );
-				$( '#hint' ).val( '' );
-			}
-			$( document ).ready( function () {
-				var source = new EventSource( '/stream/questions' );
-				source.onmessage = function( e ) {
-					$( '#questions' ).after( e.data );
-				};
-			} );
-		</script>
-	</head>
-	<body>
-		<p>Hint:</p>
-		
-	    <form action="#" method="post">
-			<textarea rows=4 cols=80 id="hint"></textarea>
-			<select id="kind">
-				<option selected>text</option>
-				<option>code</option>
-				<option>html</option>
-			</select>
-			<button type="button" onclick="post_hint(); return false;">Post</button>
-		</form>
-		
-		<p id="questions">Questions:</p>
-	</body>
-</html>
+{% extends "layout.html" %}
+{% block script %}
+function post_hint( e ) {
+	var kind = $( '#kind' ).val();
+	var hint = $( '#hint' ).val();
+	if ( hint != '' ) $.post( '/post/hints/' + kind, { 'message': hint } );
+	$( '#hint' ).val( '' );
+}
+$( document ).ready( function () {
+	var source = new EventSource( '/stream/questions' );
+	source.onmessage = function( e ) {
+		$( '#questions' ).after( e.data );
+	};
+} );
+{% endblock %}
+{% block body %}
+<p>Hint:</p>
+<form action="#" method="post">
+	<textarea rows=4 cols=80 id="hint"></textarea>
+	<select id="kind">
+		<option selected>text</option>
+		<option>code</option>
+		<option>html</option>
+	</select>
+	<button type="button" onclick="post_hint(); return false;">Post</button>
+</form>
+<p id="questions">Questions:</p>
+{% endblock %}
