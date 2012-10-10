@@ -1,24 +1,29 @@
+from cgi import escape 
 import datetime
+
 from flask import Flask, render_template, request, Response
+
 import redis
 
 app = Flask( __name__ )
 red = redis.StrictRedis( unix_socket_path = './redis/redis.sock' )
 
-@app.route( '/post/<kind>', methods = [ 'POST' ] )
-def post( kind ):
+@app.route( '/post/<channel>/<kind>', methods = [ 'POST' ] )
+def post( channel, kind ):
 	ip = request.remote_addr
 	message = request.form[ 'message' ]
 	now = datetime.datetime.now().replace(microsecond=0).time()
+	if ( kind == 'text' ):
+		message = escape( message )
 	data = u'<fieldset><legend>{0}</legend><pre>{1}</pre></fieldset>'.format( now.isoformat(), message );
-	red.publish( kind, data )
+	red.publish( channel, data )
 	return ''
 
-@app.route( '/stream/<kind>' )
-def stream( kind ):
+@app.route( '/stream/<channel>' )
+def stream( channel ):
 	def event_stream():
 		pubsub = red.pubsub()
-		pubsub.subscribe( kind )
+		pubsub.subscribe( channel )
 		for message in pubsub.listen():
 			if message[ 'type' ] != 'message': continue
 			for line in message[ 'data' ].split( '\n' ):

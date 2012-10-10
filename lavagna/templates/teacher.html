@@ -6,7 +6,9 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		<script>
 			function post_hint( e ) {
-				$.post( '/post/hints', { 'message': $( '#hint' ).val() } );
+				var hint = $( '#hint' ).val();
+				var kind = $( '#kind' ).val();
+				if ( hint != '' ) $.post( '/post/hints/' + kind, { 'message': hint } );
 				$( '#hint' ).val( '' );
 			}
 			$( document ).ready( function () {
@@ -20,8 +22,20 @@
 	</head>
 	<body>
 		<p>Hint:</p>
-		<textarea rows=4 cols=80 id="hint"></textarea>
-		<button type="button" onclick="post_hint(); return false;">Post hint</button>
+		
+	    <form action="#" method="post">
+			<textarea rows=4 cols=80 id="hint"></textarea>
+			<select id="kind">
+				<option selected>text</option>
+				<option html>html</option>
+				<option html>code</option>
+			</select>
+			<button type="button" onclick="post_hint(); return false;">Post hint</button>
+		</form>
+		
+		
+
+
 		<p>Questions:</p>
 		<div id="questions"></div>
 	</body>

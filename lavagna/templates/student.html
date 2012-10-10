@@ -14,7 +14,8 @@
 				};
 				$( '#question' ).keyup( function( e ) {
 					if ( e.keyCode == 13 ) {
-						$.post( '/post/questions', { 'message': $(this).val() } );
+						var question = $(this).val();
+						if ( question != '' ) $.post( '/post/questions/text', { 'message': question } );
 						$(this).val( '' );
 					}
 				} );
@@ -23,7 +24,7 @@
 	</head>
 	<body>
 		<p>Room: <b>{{ room }}</b>, student: <b>{{ student }}</b></p>
-		<p>Question: <input id="question" /></p>
+		<p>Question: <input id="question" size=120/></p>
 		<p>Hints:</p>
 		<div id="hints"></div>
 	</body>
