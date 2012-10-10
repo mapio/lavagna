@@ -12,11 +12,16 @@ red = redis.StrictRedis( unix_socket_path = './redis/redis.sock' )
 def post( channel, kind ):
 	ip = request.remote_addr
 	message = request.form[ 'message' ]
-	now = datetime.datetime.now().replace(microsecond=0).time()
-	if ( kind == 'text' ):
+	now = datetime.datetime.now().replace(microsecond=0).time().isoformat()
+	if ( kind != 'html' ):
 		message = escape( message )
-	data = u'<fieldset><legend>{0}</legend><pre>{1}</pre></fieldset>'.format( now.isoformat(), message );
-	red.publish( channel, data )
+	if ( kind == 'text' ):
+		content = '<pre style="white-space: pre-wrap;">{0}</pre>'.format( message )
+	elif ( kind == 'code' ):
+		content = '<pre class="pp">{0}</pre>'.format( message )
+	else:
+		content = message
+	red.publish( channel, u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now, content ) )
 	return ''
 
 @app.route( '/stream/<channel>' )

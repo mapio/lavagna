@@ -3,6 +3,7 @@
 	<head>
 		<title>Lavagna</title>
 		<link href="{{ url_for( 'static', filename='lavagna.css' ) }}" type="text/css" rel="stylesheet">
+		<script src="{{ url_for( 'static', filename='pp.js' ) }}"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		<script>
 			$( document ).ready( function () {
@@ -11,6 +12,7 @@
 				source.onmessage = function( e ) {
 					console.log( e.data );
 					hints.innerHTML = e.data + '\n' + hints.innerHTML;
+					prettyPrint();
 				};
 				$( '#question' ).keyup( function( e ) {
 					if ( e.keyCode == 13 ) {
