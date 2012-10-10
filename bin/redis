@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+	redis-server ./redis/redis.conf
+	sleep 1
+	redis-cli  -s redis/redis.sock info | grep uptime
+elif [ "$1" == "status" ]; then
+	redis-cli  -s redis/redis.sock info | grep uptime
+else
+	redis-cli -s ./redis/redis.sock SHUTDOWN
+	tail -n 1 ./redis/redis.log
+fi

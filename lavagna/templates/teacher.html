@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Lavagna</title>
+		<link href="{{ url_for( 'static', filename='lavagna.css' ) }}" type="text/css" rel="stylesheet">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script>
+			$( document ).ready( function () {
+				var questions = document.getElementById( 'questions' );
+				var source = new EventSource( '/stream/questions' );
+				source.onmessage = function( e ) {
+					questions.innerHTML = e.data + '\n' + questions.innerHTML;
+				};
+				$( '#in' ).keyup( function( e ) {
+					if ( e.keyCode == 13 ) {
+						$.post( '/post/hints', { 'message': $(this).val() } );
+						$(this).val( '' );
+					}
+				} );
+			} );
+		</script>
+	</head>
+	<body>
+		<p>Hint: <input id="in" /></p>	
+		<div id="questions"></div>
+	</body>
+</html>

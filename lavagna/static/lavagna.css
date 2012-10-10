@@ -1,0 +1,29 @@
+body {
+	margin: 2em;
+	font-family: "Lucida Console", Monaco, monospace;
+	font-size: large;
+}
+
+fieldset {
+	border:1px solid black;
+	margin: 2em;
+}
+
+legend {
+	padding: 0.2em 0.5em;
+	border: 1px solid black;
+	color: black;
+	font-size: 90%;
+	text-align: right;
+}
+
+.str { color: #060; }
+.kwd { color: #006; font-weight: bold; }
+.com { color: #600; font-style: italic; }
+.typ { color: #404; font-weight: bold; }
+.lit { color: #044; }
+.pun { color: #440; }
+.pln { color: #000; }
+.tag { color: #006; font-weight: bold; }
+.atn { color: #404; }
+.atv { color: #060; }

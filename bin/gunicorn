@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+	gunicorn --debug --worker-class=gevent -t 99999 lavagna:app
+elif [ "$1" == "status" ]; then
+	echo status
+else
+	echo stop
+fi
