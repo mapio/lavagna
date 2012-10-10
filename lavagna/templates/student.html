@@ -11,7 +11,7 @@
 				source.onmessage = function( e ) {
 					hints.innerHTML = e.data + '\n' + hints.innerHTML;
 				};
-				$('#in').keyup( function( e ) {
+				$( '#question' ).keyup( function( e ) {
 					if ( e.keyCode == 13 ) {
 						$.post( '/post/questions', { 'message': $(this).val() } );
 						$(this).val( '' );
@@ -21,7 +21,9 @@
 		</script>
 	</head>
 	<body>
-		<p>Question: <input id="in" /></p>	
+		<p>Room: <b>{{ room }}</b>, student: <b>{{ student }}</b></p>
+		<p>Question: <input id="question" /></p>
+		<p>Hints:</p>
 		<div id="hints"></div>
 	</body>
 </html>
