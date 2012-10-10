@@ -1,9 +1,18 @@
 #!/bin/bash
 
 if [ "$1" == "start" ]; then
-	gunicorn --debug --worker-class=gevent -t 99999 lavagna:app
+	rm -f ./data/gunicorn.*
+	gunicorn -c ./etc/gunicorn.conf lavagna:app
+	sleep 1
+	grep 'Listening at' ./data/gunicorn.errors
 elif [ "$1" == "status" ]; then
 	echo status
 else
-	echo stop
+	if [ -r ./data/gunicorn.pid ]; then
+		kill $(cat ./data/gunicorn.pid)
+		sleep 1
+		grep 'Handling signal: term' ./data/gunicorn.errors
+	else
+		echo 'no pidfile present'
+	fi
 fi

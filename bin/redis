@@ -1,12 +1,17 @@
 #!/bin/bash
 
 if [ "$1" == "start" ]; then
-	redis-server ./redis/redis.conf
+	rm -f ./data/redis.*
+	redis-server ./etc/redis.conf
 	sleep 1
-	redis-cli  -s redis/redis.sock info | grep uptime
+	redis-cli  -s ./data/redis.sock info | grep uptime
 elif [ "$1" == "status" ]; then
-	redis-cli  -s redis/redis.sock info | grep uptime
+	redis-cli  -s ./data/redis.sock info | grep uptime
 else
-	redis-cli -s ./redis/redis.sock SHUTDOWN
-	tail -n 1 ./redis/redis.log
+	if [ -r ./data/redis.pid ]; then
+		kill $(cat ./data/redis.pid)
+		tail -n 1 ./data/redis.log
+	else
+		echo 'no pidfile present'
+	fi
 fi
