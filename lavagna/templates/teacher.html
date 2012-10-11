@@ -3,7 +3,7 @@
 function post_hint( e ) {
 	var kind = $( '#kind' ).val();
 	var hint = $( '#hint' ).val();
-	if ( hint != '' ) $.post( '/post/hints/' + kind, { 'message': hint } );
+	if ( hint != '' ) $.post( '/post/hint/' + kind, { 'message': hint } );
 	$( '#hint' ).val( '' );
 }
 $( document ).ready( function () {

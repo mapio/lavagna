@@ -1,15 +1,15 @@
 from cgi import escape 
 import datetime
 
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, abort
 
 import redis
 
 app = Flask( __name__ )
 red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
 
-@app.route( '/post/<channel>/<kind>', methods = [ 'POST' ] )
-def post( channel, kind ):
+@app.route( '/post/hint/<kind>', methods = [ 'POST' ] )
+def post_hint( kind ):
 	ip = request.remote_addr
 	message = request.form[ 'message' ]
 	now = datetime.datetime.now().replace( microsecond = 0).time().isoformat()
@@ -21,7 +21,17 @@ def post( channel, kind ):
 		content = '<pre class="pp">{0}</pre>'.format( message )
 	else:
 		content = message
-	red.publish( channel, u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now, content ) )
+	red.publish( 'hints', u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now, content ) )
+	return ''
+
+@app.route( '/post/question/<uid>', methods = [ 'POST' ] )
+def post_question( uid ):
+	ip = request.remote_addr
+	message = request.form[ 'message' ]
+	student = red.get( 'student:{0}'.format( uid ) )
+	now = datetime.datetime.now().replace( microsecond = 0).time().isoformat()
+	content = message
+	red.publish( 'questions', u'<fieldset><legend>{0}, {1} @ {2}</legend>{3}</fieldset>'.format( student, ip, now, content ) )
 	return ''
 
 @app.route( '/stream/<channel>' )
@@ -39,7 +49,8 @@ def stream( channel ):
 @app.route('/s/<room>/<uid>')
 def student( room, uid ):
 	student = red.get( 'student:{0}'.format( uid ) )
-	return render_template( 'student.html', room = room, student = student )
+	if not student: abort( 404 )
+	return render_template( 'student.html', room = room, uid = uid, student = student )
 
 @app.route('/t/<room>')
 def teacher( room ):
