@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block script %}
+$( document ).ready( function () {
+	$( 'td' ).mouseenter( function () {
+		$( '#info' )[0].innerHTML = $(this)[0].id;
+		if ( $(this)[0].id ) $(this)[0].style.background = 'yellow';
+	});
+	$( 'td' ).mouseleave( function () {
+		$( '#info' )[0].innerHTML = '&nbsp;';
+		$(this)[0].style.background = 'white';
+	});
+} );
+{% endblock %}
+{% block body %}
+
+<div id="info" style="width: 10em; border: 1px solid black; margin: 1em; ">&nbsp;</div>
+
+<table>
+
+	{% for col in range( 4 ) %}<td style="border: none;">&nbsp;{% endfor %}
+
+	{% for col in range( 1, 5 ) %}
+		{% set label = 'pcs13-0' ~ col %}
+		<td id="{{ label }}">&nbsp;{{ label }}
+
+	{% endfor %}
+	{% for row in range( 11, 0, -2 ) %}<tr>
+
+		{% for col in range( 4, 0, -1 ) %}
+			{% set label = 'pcs' ~ row ~ '-0' ~ col %}
+			<td id="{{ label }}">&nbsp;{{ label }}
+		{% endfor %}
+		{% for col in range( 1, 5 ) %}
+			{% set label = 'pcs' ~ ( row + 1 ) ~ '-0' ~ col %}
+			<td id="{{ label }}">&nbsp;{{ label }}
+		{% endfor %}
+
+	{% endfor %}
+	
+</table>
+
+<table>
+
+	{% for row in range( 6, 0, -1 ) %}<tr>
+		{% for col in range( 1, 6 ) %}
+			{% set label = 'pco' ~ row ~ '-0' ~ col %}
+			<td id="{{ label }}">&nbsp;{{ label }}
+		{% endfor %}
+	{% endfor %}
+
+</table>
+{% endblock %}

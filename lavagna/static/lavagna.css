@@ -4,6 +4,17 @@ body {
 	font-size: large;
 }
 
+table { 
+	border: 1pt solid black;
+	border-spacing: 1em;
+	margin: 1em;
+}
+td { 
+	border: 1pt solid black; 
+	width: 6em; 
+}
+
+
 fieldset {
 	border:1px solid black;
 	margin: 2em;

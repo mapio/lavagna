@@ -8,6 +8,13 @@ import redis
 app = Flask( __name__ )
 red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
 
+IPS={}
+for line in open( './etc/ips.tsv' ):
+	n, a = line.strip().split( '\t' )
+	IPS[ n ] = a
+
+print IPS
+
 @app.route( '/post/hint/<kind>', methods = [ 'POST' ] )
 def post_hint( kind ):
 	ip = request.remote_addr
@@ -46,15 +53,19 @@ def stream( channel ):
 			yield '\n\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
 
-@app.route('/s/<room>/<uid>')
+@app.route( '/s/<room>/<uid>' )
 def student( room, uid ):
 	student = red.get( 'student:{0}'.format( uid ) )
 	if not student: abort( 404 )
 	return render_template( 'student.html', room = room, uid = uid, student = student )
 
-@app.route('/t/<room>')
+@app.route( '/t/<room>' )
 def teacher( room ):
 	return render_template( 'teacher.html', room = room )
+
+@app.route( '/map' )
+def map():
+	return render_template( 'map.html', ipmap = IPS	 )
 
 if __name__ == '__main__':
 	app.debug = True
