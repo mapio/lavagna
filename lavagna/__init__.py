@@ -11,10 +11,10 @@ red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
 def now():
 	return datetime.datetime.now().replace( microsecond = 0).time().isoformat()
 	
-def identify( uid, ip ):
-	student = red.get( 'student:{0}'.format( uid ) )
-	location = red.get( 'location:{0}'.format( ip ) )
-	return student, location
+def identify( token ):
+	info = red.get( 'token:{0}'.format( token ) )
+	if info: return info.split( '@' )
+	else: return None, None
 
 @app.route( '/post/hint/<kind>', methods = [ 'POST' ] )
 def post_hint( kind ):
@@ -30,9 +30,9 @@ def post_hint( kind ):
 	red.publish( 'hints', u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now(), content ) )
 	return ''
 
-@app.route( '/post/question/<uid>', methods = [ 'POST' ] )
-def post_question( uid ):
-	student, location = identify( uid, request.remote_addr )
+@app.route( '/post/question/<token>', methods = [ 'POST' ] )
+def post_question( token ):
+	student, location = identify( token )
 	message = request.form[ 'message' ]
 	red.publish( 'questions', u'<fieldset><legend>{0}, {1} @ {2}</legend>{3}</fieldset>'.format( student, location, now(), message ) )
 	return ''
@@ -49,21 +49,27 @@ def stream( channel ):
 			yield '\n\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
 
-@app.route( '/s/<uid>/<location>' )
-def student( uid, location ):
-	print request.remote_addr
-	student, location = identify( uid, request.remote_addr )
-	print student, location	
+@app.route( '/s/<token>' )
+def student( token ):
+	student, location = identify( token )
 	if not student or not location: abort( 404 )
-	return render_template( 'student.html', room = room, location = location, student = student )
+	return render_template( 'student.html', student = student, location = location )
+
+@app.route( '/get_token', methods = [ 'POST' ] ) # curl -x '' -d loc=123 -d uid=123 http://localhost:8000/get_token
+def get_token():
+	uid = request.form[ 'uid' ]
+	loc = request.form[ 'loc' ]
+	token = '1234'
+	red.set( 'token:{0}'.format( token ), '{0}@{1}'.format( uid, loc ) )
+	return Response( token, mimetype = 'text/plain' )
 
 @app.route( '/t' )
 def teacher():
-	return render_template( 'teacher.html', room = room )
+	return render_template( 'teacher.html')
 
 @app.route( '/map' )
 def map():
-	return render_template( 'map.html', ipmap = IPS	 )
+	return render_template( 'map.html' )
 
 if __name__ == '__main__':
 	app.debug = True
