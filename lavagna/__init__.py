@@ -15,11 +15,17 @@ for line in open( './etc/ips.tsv' ):
 
 print IPS
 
+def now():
+	return datetime.datetime.now().replace( microsecond = 0).time().isoformat()
+	
+def identify( uid, ip ):
+	student = red.get( 'student:{0}'.format( uid ) )
+	location = red.get( 'location:{0}'.format( ip ) )
+	return student, location
+
 @app.route( '/post/hint/<kind>', methods = [ 'POST' ] )
 def post_hint( kind ):
-	ip = request.remote_addr
 	message = request.form[ 'message' ]
-	now = datetime.datetime.now().replace( microsecond = 0).time().isoformat()
 	if ( kind != 'html' ):
 		message = escape( message )
 	if ( kind == 'text' ):
@@ -28,17 +34,14 @@ def post_hint( kind ):
 		content = '<pre class="pp">{0}</pre>'.format( message )
 	else:
 		content = message
-	red.publish( 'hints', u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now, content ) )
+	red.publish( 'hints', u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now(), content ) )
 	return ''
 
 @app.route( '/post/question/<uid>', methods = [ 'POST' ] )
 def post_question( uid ):
-	ip = request.remote_addr
+	student, location = identify( uid, request.remote_addr )
 	message = request.form[ 'message' ]
-	student = red.get( 'student:{0}'.format( uid ) )
-	now = datetime.datetime.now().replace( microsecond = 0).time().isoformat()
-	content = message
-	red.publish( 'questions', u'<fieldset><legend>{0}, {1} @ {2}</legend>{3}</fieldset>'.format( student, ip, now, content ) )
+	red.publish( 'questions', u'<fieldset><legend>{0}, {1} @ {2}</legend>{3}</fieldset>'.format( student, location, now(), message ) )
 	return ''
 
 @app.route( '/stream/<channel>' )
@@ -55,9 +58,9 @@ def stream( channel ):
 
 @app.route( '/s/<room>/<uid>' )
 def student( room, uid ):
-	student = red.get( 'student:{0}'.format( uid ) )
-	if not student: abort( 404 )
-	return render_template( 'student.html', room = room, uid = uid, student = student )
+	student, location = identify( uid, request.remote_addr )
+	if not student or not location: abort( 404 )
+	return render_template( 'student.html', room = room, location = location, student = student )
 
 @app.route( '/t/<room>' )
 def teacher( room ):

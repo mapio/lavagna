@@ -7,3 +7,6 @@ if __name__ == '__main__':
 	for line in open( './etc/students.tsv' ):
 		uid, student = line.strip().split( '\t' )
 		red.set( 'student:{0}'.format( uid ), student )
+	for line in open( './etc/locations.tsv' ):
+		ip, location = line.strip().split( '\t' )
+		red.set( 'location:{0}'.format( ip ), location )
