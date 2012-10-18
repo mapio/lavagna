@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 
-from getpass import getuser
+from os import getuid
 from platform import node
+from pwd import getpwuid
 from urllib import urlencode
 from urllib2 import urlopen
 from webbrowser import open_new
+from sys import argv
 
-token = urlopen(
-		'http://localhost:8000/get_token', 
-		urlencode( { 'loc': node(), 'uid': getuser() } ) 
-	).read()
+url = 'http://localhost:8000/get_token'
 
-open_new( 'http://localhost:8000/s/{0}'.format( token ) )
+student = argv[ 1 ] if len( argv ) >= 2 else getpwuid( getuid() ).pw_gecos
+location = argv[ 2 ] if len( argv ) == 3 else node()
+
+data = urlencode( { 'student': student, 'location': location } ) 
+token = urlopen( url, data ).read()
+
+#open_new( 'http://localhost:8000/s/{0}'.format( token ) )

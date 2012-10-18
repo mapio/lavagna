@@ -1,0 +1,14 @@
+{% extends "maps/base.html" %}
+{% block map %}
+<table class="map">
+
+	{% for row in range( 6, 0, -1 ) %}<tr>
+		{% for col in range( 5, 0, -1 ) %}
+			{% set label = 'pco' ~ row ~ '-0' ~ col %}
+			{% if col == 3 %}<td>&nbsp;{% endif %}
+			<td id="{{ label }}">&nbsp;{{ label }}
+		{% endfor %}
+	{% endfor %}
+
+</table>
+{% endblock %}

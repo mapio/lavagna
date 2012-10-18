@@ -4,16 +4,31 @@ body {
 	font-size: large;
 }
 
-table { 
+#tooltip {
+	position: absolute;
+	display: none;
+	z-index: 1000;
+	background-color: yellow;
+	color: black;
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: .5em;
+}
+
+table.map { 
 	border: 1pt solid black;
 	border-spacing: 1em;
 	margin: 1em;
 }
-td { 
-	border: 1pt solid black; 
+table.map td[id] { 
+	border: 1pt solid black;
+	border-radius: 5px;
+	width: 8em; 
+}
+table.map td { 
+	border: none; 
 	width: 6em; 
 }
-
 
 fieldset {
 	border:1px solid black;

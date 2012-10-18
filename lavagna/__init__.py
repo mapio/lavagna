@@ -3,11 +3,12 @@ from uuid import uuid4
 from datetime import datetime
 
 from flask import Flask, render_template, request, Response, abort
+from jinja2.exceptions import TemplateNotFound
 
-import redis
+from redis import StrictRedis
 
 app = Flask( __name__ )
-red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
+red = StrictRedis( unix_socket_path = './data/redis.sock' )
 
 def now():
 	return datetime.now().replace( microsecond = 0).time().isoformat()
@@ -41,36 +42,48 @@ def post_question( token ):
 @app.route( '/stream/<channel>' )
 def stream( channel ):
 	def event_stream():
+		if channel == 'infos':
+			for info in red.smembers( 'infos' ):
+				yield 'data: {0}\n\n'.format( info )
 		pubsub = red.pubsub()
 		pubsub.subscribe( channel )
 		for message in pubsub.listen():
 			if message[ 'type' ] != 'message': continue
 			for line in message[ 'data' ].split( '\n' ):
 				yield 'data: {0}\n'.format( line )
-			yield '\n\n'
+			yield '\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
 
 @app.route( '/s/<token>' )
 def student( token ):
 	student, location = identify( token )
-	if not student or not location: abort( 404 )
+	if not student: abort( 404 )
 	return render_template( 'student.html', token = token, student = student, location = location )
 
 @app.route( '/get_token', methods = [ 'POST' ] )
 def get_token():
-	uid = request.form[ 'uid' ]
-	loc = request.form[ 'loc' ]
-	token = uuid4().hex
-	red.set( 'token:{0}'.format( token ), '{0}@{1}'.format( uid, loc ) )
+	student, location = request.form[ 'student' ], request.form[ 'location' ]
+	info = '{0}@{1}'.format( student, location )
+	token = red.get( 'invtoken:{0}'.format( info ) )
+	if not token:
+		token = uuid4().hex
+		red.sadd( 'infos', info )
+		red.publish( 'infos', info )
+		red.set( 'invtoken:{0}'.format( info ), token )
+		red.set( 'token:{0}'.format( token ), info )
 	return Response( token, mimetype = 'text/plain' )
 
 @app.route( '/t' )
 def teacher():
-	return render_template( 'teacher.html')
+	return render_template( 'teacher.html' )
 
-@app.route( '/map' )
-def map():
-	return render_template( 'map.html' )
+@app.route( '/map/<room>' )
+def map( room ):
+	try:
+		ret = render_template( 'maps/{0}.html'.format( room ) )
+	except TemplateNotFound:
+		abort( 404 )
+	return ret
 
 if __name__ == '__main__':
 	app.debug = True
