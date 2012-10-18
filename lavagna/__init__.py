@@ -8,13 +8,6 @@ import redis
 app = Flask( __name__ )
 red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
 
-IPS={}
-for line in open( './etc/ips.tsv' ):
-	n, a = line.strip().split( '\t' )
-	IPS[ n ] = a
-
-print IPS
-
 def now():
 	return datetime.datetime.now().replace( microsecond = 0).time().isoformat()
 	
@@ -58,7 +51,9 @@ def stream( channel ):
 
 @app.route( '/s/<room>/<uid>' )
 def student( room, uid ):
+	print request.remote_addr
 	student, location = identify( uid, request.remote_addr )
+	print student, location	
 	if not student or not location: abort( 404 )
 	return render_template( 'student.html', room = room, location = location, student = student )
 
