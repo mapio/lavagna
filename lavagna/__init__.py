@@ -49,16 +49,16 @@ def stream( channel ):
 			yield '\n\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
 
-@app.route( '/s/<room>/<uid>' )
-def student( room, uid ):
+@app.route( '/s/<uid>/<location>' )
+def student( uid, location ):
 	print request.remote_addr
 	student, location = identify( uid, request.remote_addr )
 	print student, location	
 	if not student or not location: abort( 404 )
 	return render_template( 'student.html', room = room, location = location, student = student )
 
-@app.route( '/t/<room>' )
-def teacher( room ):
+@app.route( '/t' )
+def teacher():
 	return render_template( 'teacher.html', room = room )
 
 @app.route( '/map' )
