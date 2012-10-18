@@ -1,4 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-token=$(curl -s -x '' -d loc=$(hostname) -d uid=$(id -un) http://localhost:8000/get_token)
-echo http://localhost:8000/s/$token
+from getpass import getuser
+from platform import node
+from urllib import urlencode
+from urllib2 import urlopen
+from webbrowser import open_new
+
+token = urlopen(
+		'http://localhost:8000/get_token', 
+		urlencode( { 'loc': node(), 'uid': getuser() } ) 
+	).read()
+
+open_new( 'http://localhost:8000/s/{0}'.format( token ) )

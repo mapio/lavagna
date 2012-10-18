@@ -1,5 +1,6 @@
 from cgi import escape 
-import datetime
+from uuid import uuid4 
+from datetime import datetime
 
 from flask import Flask, render_template, request, Response, abort
 
@@ -9,7 +10,7 @@ app = Flask( __name__ )
 red = redis.StrictRedis( unix_socket_path = './data/redis.sock' )
 
 def now():
-	return datetime.datetime.now().replace( microsecond = 0).time().isoformat()
+	return datetime.now().replace( microsecond = 0).time().isoformat()
 	
 def identify( token ):
 	info = red.get( 'token:{0}'.format( token ) )
@@ -53,13 +54,13 @@ def stream( channel ):
 def student( token ):
 	student, location = identify( token )
 	if not student or not location: abort( 404 )
-	return render_template( 'student.html', student = student, location = location )
+	return render_template( 'student.html', token = token, student = student, location = location )
 
-@app.route( '/get_token', methods = [ 'POST' ] ) # curl -x '' -d loc=123 -d uid=123 http://localhost:8000/get_token
+@app.route( '/get_token', methods = [ 'POST' ] )
 def get_token():
 	uid = request.form[ 'uid' ]
 	loc = request.form[ 'loc' ]
-	token = '1234'
+	token = uuid4().hex
 	red.set( 'token:{0}'.format( token ), '{0}@{1}'.format( uid, loc ) )
 	return Response( token, mimetype = 'text/plain' )
 

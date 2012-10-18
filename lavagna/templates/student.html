@@ -9,7 +9,7 @@ $( document ).ready( function () {
 	$( '#question' ).keyup( function( e ) {
 		if ( e.keyCode == 13 ) {
 			var question = $( this ).val();
-			if ( question != '' ) $.post( '/post/question/' + {{ uid }}, { 'message': question } );
+			if ( question != '' ) $.post( '/post/question/' + {{ token }}, { 'message': question } );
 			$( this ).val( '' );
 		}
 	} );
