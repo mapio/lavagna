@@ -36,15 +36,16 @@ def post_hint( kind ):
 def post_question( token ):
 	student, location = identify( token )
 	message = request.form[ 'message' ]
-	red.publish( 'questions', u'<fieldset><legend>{0}, {1} @ {2}</legend>{3}</fieldset>'.format( student, location, now(), message ) )
+	red.publish( 'map', 'question@{0}@{1}'.format( student, location ) )
+	red.publish( 'questions', u'<fieldset><legend>{0} {1}@{2}</legend>{3}</fieldset>'.format( now(), student, location, message ) )
 	return ''
 
 @app.route( '/stream/<channel>' )
 def stream( channel ):
 	def event_stream():
-		if channel == 'infos':
-			for info in red.smembers( 'infos' ):
-				yield 'data: {0}\n\n'.format( info )
+		if channel == 'map':
+			for info in red.smembers( 'map' ):
+				yield 'data: token@{0}\n\n'.format( info )
 		pubsub = red.pubsub()
 		pubsub.subscribe( channel )
 		for message in pubsub.listen():
@@ -67,8 +68,8 @@ def get_token():
 	token = red.get( 'invtoken:{0}'.format( info ) )
 	if not token:
 		token = uuid4().hex
-		red.sadd( 'infos', info )
-		red.publish( 'infos', info )
+		red.sadd( 'map', info )
+		red.publish( 'map', 'token@{0}'.format( info ) )
 		red.set( 'invtoken:{0}'.format( info ), token )
 		red.set( 'token:{0}'.format( token ), info )
 	return Response( token, mimetype = 'text/plain' )

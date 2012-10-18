@@ -16,4 +16,4 @@ location = argv[ 2 ] if len( argv ) == 3 else node()
 data = urlencode( { 'student': student, 'location': location } ) 
 token = urlopen( url, data ).read()
 
-#open_new( 'http://localhost:8000/s/{0}'.format( token ) )
+open_new( 'http://localhost:8000/s/{0}'.format( token ) )
