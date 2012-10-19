@@ -8,7 +8,7 @@ from urllib2 import urlopen
 from webbrowser import open_new
 from sys import argv
 
-url = 'http://localhost:8000/get_token'
+url = 'http://hal.silab.di.unimi.it:8000/get_token'
 
 student = argv[ 1 ] if len( argv ) >= 2 else getpwuid( getuid() ).pw_gecos
 location = argv[ 2 ] if len( argv ) == 3 else node()
@@ -16,4 +16,4 @@ location = argv[ 2 ] if len( argv ) == 3 else node()
 data = urlencode( { 'student': student, 'location': location } ) 
 token = urlopen( url, data ).read()
 
-open_new( 'http://localhost:8000/s/{0}'.format( token ) )
+open_new( 'http://hal.silab.di.unimi.it:8000/s/{0}'.format( token ) )

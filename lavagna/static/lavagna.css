@@ -23,11 +23,11 @@ table.map {
 table.map td[id] { 
 	border: 1pt solid black;
 	border-radius: 5px;
-	width: 8em; 
+	width: 2em; 
 }
 table.map td { 
 	border: none; 
-	width: 6em; 
+	width: 1em; 
 }
 
 fieldset {
