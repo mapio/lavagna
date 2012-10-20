@@ -2,39 +2,7 @@
 {% block script %}
 var student = new Object();
 $( document ).ready( function () {
-	var source = new EventSource( '/stream/map' );
-	source.onmessage = function( e ) {
-		infos = e.data.split( '@' );
-		elem = document.getElementById( infos[ 2 ] );
-		if ( elem ) {
-			student[ infos[ 2 ] ] = infos[ 1 ];
-			if ( infos[ 0 ] == 'token' )
-				elem.style.background = 'green';
-			else {
-				$( elem ).animate( { opacity: 'toggle' }, 'fast' );
-				$( elem ).animate( { opacity: 'toggle' }, 'fast' );
-				elem.style.background = 'red';
-			}
-		}
-	};
-	$( 'td' ).mousemove( function ( event ) {
-		if ( $(this)[ 0 ].id ) {
-			info = student[ $(this)[ 0 ].id ];
-			if ( info ) {
-				$( '#tooltip' )[ 0 ].innerHTML = info;
-				$( '#tooltip' ).css( {
-				    top: event.pageY + 5 + 'px',
-					left: event.pageX + 5 + 'px'
-				} ).show();
-			}
-		}
-	});
-	$( 'td' ).mouseleave( function () {
-		$( '#tooltip' ).hide();
-	});
 } );
 {% endblock %}
 {% block body %}
-<div id="tooltip">&nbsp;</div>
-{{ maps|safe }}
 {% endblock %}

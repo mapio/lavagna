@@ -12,6 +12,13 @@ def now():
 def seat( student, location ):
 	red.set( 'studentat:{0}'.format( location ), student )
 	red.sadd( 'busylocations', location )
+	data = {
+		'event': 'seat',
+		'student': studentat( location ),
+		'location': location,		
+		'now': now()
+	}
+	red.publish( 'teacher', dumps( data ) )
 
 def studentat( location ):
 	return red.get( 'studentat:{0}'.format( location ) )
@@ -19,20 +26,21 @@ def studentat( location ):
 def seated():
 	return dict( ( _, studentat( _ ) ) for _ in red.smembers( 'busylocations' ) )
 
-def question( message, location ):
+def question( question, location ):
 	data = {
-		'location': location,
+		'event': 'question',
 		'student': studentat( location ),
-		'message': message,
+		'location': location,
+		'question': question,
 		'now': now()
 	}
-	red.publish( 'questions', dumps( data ) )
+	red.publish( 'teacher', dumps( data ) )
 
-def answer( message, kind, destination ):
+def answer( answer, kind, destination ):
 	data = {
-		'message': message,
+		'answer': answer,
 		'kind': kind,
 		'destination': destination,
 		'now': now()
 	}
-	red.publish( 'answers', dumps( data ) )
+	red.publish( 'student', dumps( data ) )

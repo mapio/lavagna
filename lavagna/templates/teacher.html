@@ -1,29 +1,69 @@
 {% extends "layout.html" %}
 {% block script %}
-function post_hint( e ) {
+var student = new Object();
+function post_answer( e ) {
 	var kind = $( '#kind' ).val();
-	var hint = $( '#hint' ).val();
-	if ( hint != '' ) $.post( '/post/answer', { 'message': hint, 'kind': kind, 'destination': 'pippo' } );
-	$( '#hint' ).val( '' );
+	var answer = $( '#answer' ).val();
+	if ( answer != '' ) $.post( '/post/answer', { 'answer': answer, 'kind': kind, 'destination': '*' } );
+	$( '#answer' ).val( '' );
 }
 $( document ).ready( function () {
-	var source = new EventSource( '/stream/questions' );
+	
+	var source = new EventSource( '/stream/map' );
 	source.onmessage = function( e ) {
-		var data = JSON.parse( e.data );
-		$( '#questions' ).after( data.message );
+		infos = e.data.split( '@' );
+		elem = document.getElementById( infos[ 2 ] );
+		if ( elem ) {
+			student[ infos[ 2 ] ] = infos[ 1 ];
+			if ( infos[ 0 ] == 'token' )
+				elem.style.background = 'green';
+			else {
+				$( elem ).animate( { opacity: 'toggle' }, 'fast' );
+				$( elem ).animate( { opacity: 'toggle' }, 'fast' );
+				elem.style.background = 'red';
+			}
+		}
+	};
+	$( 'td' ).mousemove( function ( event ) {
+		if ( $(this)[ 0 ].id ) {
+			info = student[ $(this)[ 0 ].id ];
+			if ( info ) {
+				$( '#tooltip' )[ 0 ].innerHTML = info;
+				$( '#tooltip' ).css( {
+				    top: event.pageY + 5 + 'px',
+					left: event.pageX + 5 + 'px'
+				} ).show();
+			}
+		}
+	});
+	$( 'td' ).mouseleave( function () {
+		$( '#tooltip' ).hide();
+	});
+	
+	
+	
+	
+	var source = new EventSource( '/stream/teacher' );
+	source.onmessage = function( e ) {
+		var d = JSON.parse( e.data );
+		$( '#questions' ).after( d.question );
 	};
 } );
 {% endblock %}
 {% block body %}
+
+<div id="tooltip">&nbsp;</div>
+{{ maps|safe }}
+
 <p>Hint:</p>
 <form action="#" method="post">
-	<textarea rows=4 cols=80 id="hint"></textarea>
+	<textarea rows=4 cols=80 id="answer"></textarea>
 	<select id="kind">
 		<option selected>text</option>
 		<option>code</option>
 		<option>html</option>
 	</select>
-	<button type="button" onclick="post_hint(); return false;">Post</button>
+	<button type="button" onclick="post_answer(); return false;">Post</button>
 </form>
 <p id="questions">Questions:</p>
 {% endblock %}

@@ -22,10 +22,10 @@ def now():
 @app.route( '/post/answer', methods = [ 'POST' ] )
 def post_answer():
 	f = request.form
-	if not 'message' in f: abort( 500 )
+	if not 'answer' in f: abort( 500 )
 	if not 'kind' in f: abort( 500 )
 	if not 'destination' in f: abort( 500 )
-	answer( f[ 'message' ], f[ 'kind' ], f[ 'destination' ] )
+	answer( f[ 'answer' ], f[ 'kind' ], f[ 'destination' ] )
 	return ''
 
 @app.route( '/stream/<channel>' )
@@ -46,8 +46,8 @@ def stream( channel ):
 @app.route( '/post/question', methods = [ 'POST' ] )
 def post_question():
 	if not 'location' in session: abort( 404 )
-	if not 'message' in request.form: abort( 500 )
-	question( request.form[ 'message' ], session[ 'location' ] )
+	if not 'question' in request.form: abort( 500 )
+	question( request.form[ 'question' ], session[ 'location' ] )
 	return ''
 
 @app.route( '/' )
