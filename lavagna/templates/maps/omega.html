@@ -1,11 +1,12 @@
-<fieldset class="map"><legend>Omega</legend><table class="map">
+{% extends "maps/base.html" -%}
 
-	{% for row in range( 6, 0, -1 ) %}<tr>
-		{% for col in range( 5, 0, -1 ) %}
-			{% set label = 'pco' ~ row ~ '-0' ~ col %}
-			{% if col == 3 %}<td>&nbsp;{% endif %}
-			<td id="{{ label }}">&nbsp;
-		{% endfor %}
-	{% endfor %}
+{% block name -%}Omega{% endblock -%}
 
-</table></fieldset>
+{% block map -%}
+	{%- for row in range( 6, 0, -1 ) -%}<tr>
+		{%- for col in range( 5, 0, -1 ) -%}
+			{{ seat( 'pco' ~ row ~ '-0' ~ col ) }} 
+			{%- if col == 3 -%}{{ space() }}{%- endif -%}
+		{%- endfor -%}
+	{%- endfor -%}
+{% endblock -%}

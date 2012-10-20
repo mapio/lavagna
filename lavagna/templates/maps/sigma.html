@@ -1,23 +1,14 @@
-<fieldset class="map"><legend>Sigma</legend><table class="map">
+{%- extends "maps/base.html" -%}
 
-	{% for col in range( 5 ) %}<td>&nbsp;{% endfor %}
+{%- block name -%}Sigma{%- endblock -%}
 
-	{% for col in range( 1, 5 ) %}
-		{% set label = 'pcs13-0' ~ col %}
-		<td id="{{ label }}">&nbsp;
-	{% endfor %}
-	{% for row in range( 11, 0, -2 ) %}<tr>
-
-		{% for col in range( 1, 5 ) %}
-			{% set label = 'pcs' ~ row ~ '-0' ~ col %}
-			<td id="{{ label }}">&nbsp;
-		{% endfor %}
-		<td>&nbsp;
-		{% for col in range( 4, 0, -1 ) %}
-			{% set label = 'pcs' ~ ( row + 1 ) ~ '-0' ~ col %}
-			<td id="{{ label }}">&nbsp;
-		{% endfor %}
-
-	{% endfor %}
-	
-</table></fieldset>
+{%- block map -%}
+	{%- for col in range( 5 ) -%}{{ space() }}{%- endfor -%}
+	{%- for col in range( 1, 5 ) -%}{{ seat( 'pcs13-0' ~ col ) }}{%- endfor -%}
+	{%- for row in range( 11, 0, -2 ) -%}
+		<tr>
+		{%- for col in range( 1, 5 ) -%}{{ seat( 'pcs' ~ row ~ '-0' ~ col ) }}{%- endfor -%}
+		{{ space() }}
+		{%- for col in range( 4, 0, -1 ) -%}{{ seat( 'pcs' ~ ( row + 1 ) ~ '-0' ~ col ) }}{%- endfor -%}
+	{%- endfor -%}
+{%- endblock -%}

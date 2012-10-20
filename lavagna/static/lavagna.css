@@ -15,21 +15,45 @@ body {
 	padding: .5em;
 }
 
-fieldset.map {
-	float: left;
+/* Room maps */
+
+#maps {
+	display: inline-block;
+	vertical-align: bottom;
 }
 
-table.map {
-	border-spacing: 1em;
+#maps fieldset {
+	display: inline-block;
+	vertical-align: bottom;
 }
-table.map td[id] { 
-	border: 1pt solid black;
+
+#maps table {
+	border-spacing: .3em;
+}
+
+#maps td.seated {
+	background-color: green;
+}
+
+#maps td.question {
+	background-color: red;
+}
+
+#maps td { 
+	background-color: silver;
+	border: none;
 	border-radius: 5px;
 	width: 2em; 
 }
-table.map td { 
+
+#maps td.spacing { 
+	background-color: white;
 	border: none; 
 	width: 1em; 
+}
+
+#maps legend {
+	text-align: left;
 }
 
 fieldset {

@@ -39,10 +39,11 @@ $( document ).ready( function () {
 		if ( d.event == 'question' ) {
 			questions[ d.location ].unshift( d.question );
 			elem.innerHTML = questions[ d.location ].length;
+			elem.classList.add( 'question' );
 		} else if ( d.event == 'seat' ) {
 			student[ d.location ] = d.student;
 			questions[ d.location ] = new Array();
-			elem.style.background = 'green';
+			elem.classList.add( 'seated' );
 		}
 	}
 } );
@@ -52,7 +53,7 @@ $( document ).ready( function () {
 
 <div id="tooltip">&nbsp;</div>
 
-{{ rooms|safe }}<div style="clear: both;"></div>
+<div id="maps">{{ rooms|safe }}</div>
 
 <p>Hint:</p>
 <form action="#" method="post">
