@@ -9,21 +9,6 @@ function post_answer( e ) {
 }
 $( document ).ready( function () {
 	
-	var source = new EventSource( '/stream/map' );
-	source.onmessage = function( e ) {
-		infos = e.data.split( '@' );
-		elem = document.getElementById( infos[ 2 ] );
-		if ( elem ) {
-			student[ infos[ 2 ] ] = infos[ 1 ];
-			if ( infos[ 0 ] == 'token' )
-				elem.style.background = 'green';
-			else {
-				$( elem ).animate( { opacity: 'toggle' }, 'fast' );
-				$( elem ).animate( { opacity: 'toggle' }, 'fast' );
-				elem.style.background = 'red';
-			}
-		}
-	};
 	$( 'td' ).mousemove( function ( event ) {
 		if ( $(this)[ 0 ].id ) {
 			info = student[ $(this)[ 0 ].id ];
@@ -40,16 +25,23 @@ $( document ).ready( function () {
 		$( '#tooltip' ).hide();
 	});
 	
-	
-	
-	
 	var source = new EventSource( '/stream/teacher' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
 		if ( d.event == 'question' )
 			$( '#questions' ).after( d.question );
-		else if ( d.event == 'seat' ){
-		
+		else if ( d.event == 'seat' ) {
+
+			elem = document.getElementById( d.location );
+			if ( elem ) {
+				student[ d.location ] = d.student;
+				elem.style.background = 'green';
+					/*
+					$( elem ).animate( { opacity: 'toggle' }, 'fast' );
+					$( elem ).animate( { opacity: 'toggle' }, 'fast' );
+					*/
+			}
+
 		}
 	};
 } );
@@ -58,7 +50,7 @@ $( document ).ready( function () {
 
 <div id="tooltip">&nbsp;</div>
 
-{{ maps|safe }}<div style="clear: both;"></div>
+{{ rooms|safe }}<div style="clear: both;"></div>
 
 <p>Hint:</p>
 <form action="#" method="post">

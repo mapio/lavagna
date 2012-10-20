@@ -6,18 +6,11 @@ from datetime import datetime
 from flask import Flask, render_template, request, Response, abort, session, redirect, url_for
 from jinja2.exceptions import TemplateNotFound
 
-from redis import StrictRedis
-
-from db import seat, studentat, question, answer
+from db import seat, studentat, question, answer, messages
 
 app = Flask( __name__ )
 app.secret_key = '899BFF36-68AF-47B8-A1F0-A764A96A90CF'	# should be in a conf file!
 app.config[ 'SESSION_COOKIE_HTTPONLY' ] = False
-
-red = StrictRedis( unix_socket_path = './data/redis.sock' )
-
-def now():
-	return datetime.now().replace( microsecond = 0 ).time().isoformat()
 
 @app.route( '/post/answer', methods = [ 'POST' ] )
 def post_answer():
@@ -31,14 +24,8 @@ def post_answer():
 @app.route( '/stream/<channel>' )
 def stream( channel ):
 	def event_stream():
-		if channel == 'map':
-			for info in red.smembers( 'map' ):
-				yield 'data: token@{0}\n\n'.format( info )
-		pubsub = red.pubsub()
-		pubsub.subscribe( channel )
-		for message in pubsub.listen():
-			if message[ 'type' ] != 'message': continue
-			for line in message[ 'data' ].split( '\n' ):
+		for data in messages( channel ):
+			for line in data.split( '\n' ):
 				yield 'data: {0}\n'.format( line )
 			yield '\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
@@ -63,16 +50,13 @@ def set_session( student, location ):
 	seat( student, location )
 	return redirect( url_for( 'student' ) )
 
-@app.route( '/t/<maps>' )
-def teacher( maps ):
-	rooms =	maps.split( '+' )
-	ret = []
-	for room in rooms: 
-		try:
-			ret.append( render_template( 'maps/{0}.html'.format( room ) ) )
-		except TemplateNotFound:
-			abort( 404 )
-	return render_template( 'teacher.html', maps = '&nbsp;'.join( ret ) )
+@app.route( '/t/<rooms>' )
+def teacher( rooms ):
+	try:
+		t = [ render_template( 'maps/{0}.html'.format( _ ) ) for _ in rooms.split( '+' ) ]
+	except TemplateNotFound:
+		abort( 404 )
+	return render_template( 'teacher.html', rooms = ' '.join( t ) )
 
 if __name__ == '__main__':
 	app.debug = True
