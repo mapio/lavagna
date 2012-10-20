@@ -12,6 +12,10 @@ def now():
 def messages( channel ):
 	for data in red.lrange( 'persist:{0}'.format( channel ), 0, -1 ):
 		yield data
+	if ( channel == 'teacher' ):
+		for location in red.smembers( 'persist:teacher:questions' ):
+			for data in red.lrange( 'persist:teacher:question:{0}'.format( location ), 0, -1 ):
+				yield data
 	pubsub = red.pubsub()
 	pubsub.subscribe( channel )
 	for message in pubsub.listen():
@@ -41,6 +45,8 @@ def question( question, location ):
 		'now': now()
 	} )
 	red.publish( 'teacher', data )
+	red.sadd( 'persist:teacher:questions', location )
+	red.rpush( 'persist:teacher:question:{0}'.format( location ), data )
 
 def answer( answer, kind, destination ):
 	data = dumps( {

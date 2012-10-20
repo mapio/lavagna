@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block script %}
+
 var student = new Object();
+var questions = new Object();
+
 function post_answer( e ) {
 	var kind = $( '#kind' ).val();
 	var answer = $( '#answer' ).val();
@@ -11,16 +14,19 @@ $( document ).ready( function () {
 	
 	$( 'td' ).mousemove( function ( event ) {
 		if ( $(this)[ 0 ].id ) {
-			info = student[ $(this)[ 0 ].id ];
-			if ( info ) {
-				$( '#tooltip' )[ 0 ].innerHTML = info;
-				$( '#tooltip' ).css( {
-				    top: event.pageY + 5 + 'px',
-					left: event.pageX + 5 + 'px'
-				} ).show();
-			}
-		}
-	});
+			s = student[ $(this)[ 0 ].id ];
+			if ( !s ) return;
+			q = questions[ $(this)[ 0 ].id ];
+			qs = '<b>'+ student[ $(this)[ 0 ].id ] +'</b><ul>';
+			for ( var i = 0; i < q.length; i++ ) qs += '<li>' + q[ i ];
+			qs += '</ul>';
+			$( '#tooltip' )[ 0 ].innerHTML = qs;
+			$( '#tooltip' ).css( {
+			    top: event.pageY + 5 + 'px',
+				left: event.pageX + 5 + 'px'
+			} ).show();
+		}		
+	} );
 	$( 'td' ).mouseleave( function () {
 		$( '#tooltip' ).hide();
 	});
@@ -28,23 +34,19 @@ $( document ).ready( function () {
 	var source = new EventSource( '/stream/teacher' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
-		if ( d.event == 'question' )
-			$( '#questions' ).after( d.question );
-		else if ( d.event == 'seat' ) {
-
-			elem = document.getElementById( d.location );
-			if ( elem ) {
-				student[ d.location ] = d.student;
-				elem.style.background = 'green';
-					/*
-					$( elem ).animate( { opacity: 'toggle' }, 'fast' );
-					$( elem ).animate( { opacity: 'toggle' }, 'fast' );
-					*/
-			}
-
+		elem = document.getElementById( d.location );
+		if ( ! elem ) return;
+		if ( d.event == 'question' ) {
+			questions[ d.location ].unshift( d.question );
+			elem.innerHTML = questions[ d.location ].length;
+		} else if ( d.event == 'seat' ) {
+			student[ d.location ] = d.student;
+			questions[ d.location ] = new Array();
+			elem.style.background = 'green';
 		}
-	};
+	}
 } );
+
 {% endblock %}
 {% block body %}
 
@@ -62,5 +64,5 @@ $( document ).ready( function () {
 	</select>
 	<button type="button" onclick="post_answer(); return false;">Post</button>
 </form>
-<p id="questions">Questions:</p>
+
 {% endblock %}
