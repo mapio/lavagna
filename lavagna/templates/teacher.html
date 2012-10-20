@@ -58,6 +58,11 @@ $( document ).ready( function () {
 			$( elem ).click( function() {
 				set_destination( d.student, d.location );
 			} );
+			$( elem ).dblclick( function() {
+				elem.classList.remove( 'question' );
+				elem.innerHTML = '&nbsp';
+			} );
+			
 		}
 	}
 } );
@@ -69,7 +74,6 @@ $( document ).ready( function () {
 
 <div id="maps">{{ rooms|safe }}</div>
 
-<p>Hint:</p>
 <form action="#" method="post">
 	Destination: <input id="destination_student" type="text" disabled><button type="button" onclick="set_destination( '*', '*' ); return false;">broadcast</button><br/>
 	<textarea rows=4 cols=80 id="answer"></textarea>

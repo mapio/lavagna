@@ -1,0 +1,11 @@
+{% extends "maps/base.html" -%}
+
+{% block name -%}Guests{% endblock -%}
+
+{% block map -%}
+	{%- for row in range( 0, 4 ) -%}<tr>
+		{%- for col in range( 0, 4 ) -%}
+			{{ seat( 'guest-' ~ ( row * 4 + col ) ) }} 
+		{%- endfor -%}
+	{%- endfor -%}
+{% endblock -%}
