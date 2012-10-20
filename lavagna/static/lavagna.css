@@ -61,6 +61,14 @@ fieldset {
 	margin: 2em;
 }
 
+fieldset.private {
+	background-color: yellow;
+}
+
+fieldset.private legend {
+	background-color: yellow;
+}
+
 legend {
 	padding: 0.2em 0.5em;
 	border: 1px solid black;

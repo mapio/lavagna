@@ -4,13 +4,19 @@ $( document ).ready( function () {
 	var source = new EventSource( '/stream/student' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
-		if ( d.destination != '*' && d.destination != '{{ location }}' ) return;
+		if ( d.destination == '*' )
+			content = '<fieldset class="public"><legend>';
+		else if ( d.destination == '{{ location }}' )
+			content = '<fieldset class="private"><legend>';
+		else return;
+		content += d.now + '</legend>';
 		if ( d.kind == 'text' )
-			content = '<pre style="white-space: pre-wrap;">' + d.answer + '</pre>';
+			content += '<pre style="white-space: pre-wrap;">' + d.answer + '</pre>';
 		else if ( d.kind == 'code' )
-			content = '<pre class="pp">' + d.answer + '</pre>';
-		else content = d.answer;		
-		$( '#hints' ).after( '<fieldset><legend>' + d.now + '</legend>' + content + '</fieldset>' );
+			content += '<pre class="pp">' + d.answer + '</pre>';
+		else content += d.answer;
+		content += '</fieldset>';
+		$( '#hints' ).after( content );
 		if ( d.kind == 'code' ) prettyPrint();
 	};
 	$( '#question' ).keyup( function( e ) {

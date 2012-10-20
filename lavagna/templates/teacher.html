@@ -3,15 +3,26 @@
 
 var student = new Object();
 var questions = new Object();
+var destination_student = null;
+var destination_location = null;
 
 function post_answer( e ) {
 	var kind = $( '#kind' ).val();
 	var answer = $( '#answer' ).val();
-	if ( answer != '' ) $.post( '/post/answer', { 'answer': answer, 'kind': kind, 'destination': '*' } );
+	if ( answer != '' ) $.post( '/post/answer', { 'answer': answer, 'kind': kind, 'destination': destination_location } );
 	$( '#answer' ).val( '' );
 }
+
+function set_destination( student, location ) {
+	destination_student.value = student;
+	destination_location = location;
+}
+
 $( document ).ready( function () {
-	
+
+ 	destination_student = document.getElementById( 'destination_student' );
+ 	set_destination( '*', '*' );
+ 
 	$( 'td' ).mousemove( function ( event ) {
 		if ( $(this)[ 0 ].id ) {
 			s = student[ $(this)[ 0 ].id ];
@@ -29,7 +40,7 @@ $( document ).ready( function () {
 	} );
 	$( 'td' ).mouseleave( function () {
 		$( '#tooltip' ).hide();
-	});
+	} );
 	
 	var source = new EventSource( '/stream/teacher' );
 	source.onmessage = function( e ) {
@@ -44,6 +55,9 @@ $( document ).ready( function () {
 			student[ d.location ] = d.student;
 			questions[ d.location ] = new Array();
 			elem.classList.add( 'seated' );
+			$( elem ).click( function() {
+				set_destination( d.student, d.location );
+			} );
 		}
 	}
 } );
@@ -57,6 +71,7 @@ $( document ).ready( function () {
 
 <p>Hint:</p>
 <form action="#" method="post">
+	Destination: <input id="destination_student" type="text" disabled><button type="button" onclick="set_destination( '*', '*' ); return false;">broadcast</button><br/>
 	<textarea rows=4 cols=80 id="answer"></textarea>
 	<select id="kind">
 		<option selected>text</option>
