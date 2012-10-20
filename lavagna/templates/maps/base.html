@@ -1,0 +1,7 @@
+{%- macro seat( label ) -%}
+    <td id="{{ label }}">&nbsp;
+{%- endmacro -%}
+{%- macro space( label ) -%}
+    <td class="spacing">&nbsp;
+{%- endmacro -%}
+<fieldset><legend>{%- block name -%}{%- endblock -%}</legend><table>{%- block map -%}{%- endblock -%}</table></fieldset>
