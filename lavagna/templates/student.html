@@ -1,15 +1,22 @@
 {% extends "layout.html" %}
 {% block script %}
 $( document ).ready( function () {
-	var source = new EventSource( '/stream/hints' );
+	var source = new EventSource( '/stream/answers' );
 	source.onmessage = function( e ) {
-		$( '#hints' ).after( e.data );
-		prettyPrint();
+		var data = JSON.parse( e.data );
+		if ( data.destination != '*' && data.destination != '{{ location }}' ) return;
+		if ( data.kind == 'text' )
+			content = '<pre style="white-space: pre-wrap;">' + data.message + '</pre>';
+		else if ( data.kind == 'code' )
+			content = '<pre class="pp">' + data.message + '</pre>';
+		else content = data.message;		
+		$( '#hints' ).after( '<fieldset><legend>' + data.now + '</legend>' + content + '</fieldset>' );
+		if ( data.kind == 'code' ) prettyPrint();
 	};
 	$( '#question' ).keyup( function( e ) {
 		if ( e.keyCode == 13 ) {
 			var question = $( this ).val();
-			if ( question != '' ) $.post( '/post/question/{{ token }}', { 'message': question } );
+			if ( question != '' ) $.post( '/post/question', { 'message': question } );
 			$( this ).val( '' );
 		}
 	} );

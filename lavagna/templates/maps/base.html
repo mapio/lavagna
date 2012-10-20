@@ -36,5 +36,5 @@ $( document ).ready( function () {
 {% endblock %}
 {% block body %}
 <div id="tooltip">&nbsp;</div>
-{% block map %}{% endblock %}
+{{ maps|safe }}
 {% endblock %}

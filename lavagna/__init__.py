@@ -1,43 +1,31 @@
 from cgi import escape 
+from json import dumps
 from uuid import uuid4 
 from datetime import datetime
 
-from flask import Flask, render_template, request, Response, abort
+from flask import Flask, render_template, request, Response, abort, session, redirect, url_for
 from jinja2.exceptions import TemplateNotFound
 
 from redis import StrictRedis
 
+from db import seat, studentat, question, answer
+
 app = Flask( __name__ )
+app.secret_key = '899BFF36-68AF-47B8-A1F0-A764A96A90CF'	# should be in a conf file!
+app.config[ 'SESSION_COOKIE_HTTPONLY' ] = False
+
 red = StrictRedis( unix_socket_path = './data/redis.sock' )
 
 def now():
-	return datetime.now().replace( microsecond = 0).time().isoformat()
-	
-def identify( token ):
-	info = red.get( 'token:{0}'.format( token ) )
-	if info: return info.split( '@' )
-	else: return None, None
+	return datetime.now().replace( microsecond = 0 ).time().isoformat()
 
-@app.route( '/post/hint/<kind>', methods = [ 'POST' ] )
-def post_hint( kind ):
-	message = request.form[ 'message' ]
-	if ( kind != 'html' ):
-		message = escape( message )
-	if ( kind == 'text' ):
-		content = '<pre style="white-space: pre-wrap;">{0}</pre>'.format( message )
-	elif ( kind == 'code' ):
-		content = '<pre class="pp">{0}</pre>'.format( message )
-	else:
-		content = message
-	red.publish( 'hints', u'<fieldset><legend>{0}</legend>{1}</fieldset>'.format( now(), content ) )
-	return ''
-
-@app.route( '/post/question/<token>', methods = [ 'POST' ] )
-def post_question( token ):
-	student, location = identify( token )
-	message = request.form[ 'message' ]
-	red.publish( 'map', 'question@{0}@{1}'.format( student, location ) )
-	red.publish( 'questions', u'<fieldset><legend>{0} {1}@{2}</legend>{3}</fieldset>'.format( now(), student, location, message ) )
+@app.route( '/post/answer', methods = [ 'POST' ] )
+def post_answer():
+	f = request.form
+	if not 'message' in f: abort( 500 )
+	if not 'kind' in f: abort( 500 )
+	if not 'destination' in f: abort( 500 )
+	answer( f[ 'message' ], f[ 'kind' ], f[ 'destination' ] )
 	return ''
 
 @app.route( '/stream/<channel>' )
@@ -55,24 +43,25 @@ def stream( channel ):
 			yield '\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
 
-@app.route( '/s/<token>' )
-def student( token ):
-	student, location = identify( token )
-	if not student: abort( 404 )
-	return render_template( 'student.html', token = token, student = student, location = location )
+@app.route( '/post/question', methods = [ 'POST' ] )
+def post_question():
+	if not 'location' in session: abort( 404 )
+	if not 'message' in request.form: abort( 500 )
+	question( request.form[ 'message' ], session[ 'location' ] )
+	return ''
 
-@app.route( '/get_token', methods = [ 'POST' ] )
-def get_token():
-	student, location = request.form[ 'student' ], request.form[ 'location' ]
-	info = '{0}@{1}'.format( student, location )
-	token = red.get( 'invtoken:{0}'.format( info ) )
-	if not token:
-		token = uuid4().hex
-		red.sadd( 'map', info )
-		red.publish( 'map', 'token@{0}'.format( info ) )
-		red.set( 'invtoken:{0}'.format( info ), token )
-		red.set( 'token:{0}'.format( token ), info )
-	return Response( token, mimetype = 'text/plain' )
+@app.route( '/' )
+def student():
+	if not 'location' in session: abort( 404 )
+	location = session[ 'location' ]
+	student = studentat( location )
+	return render_template( 'student.html', student = student, location = location )
+
+@app.route( '/seat/<student>/<location>' )
+def set_session( student, location ):
+	session[ 'location' ] = location
+	seat( student, location )
+	return redirect( url_for( 'student' ) )
 
 @app.route( '/t' )
 def teacher():
@@ -84,7 +73,7 @@ def map( room ):
 		ret = render_template( 'maps/{0}.html'.format( room ) )
 	except TemplateNotFound:
 		abort( 404 )
-	return ret
+	return render_template( 'maps/base.html', maps = ret )
 
 if __name__ == '__main__':
 	app.debug = True

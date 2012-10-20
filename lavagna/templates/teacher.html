@@ -3,13 +3,14 @@
 function post_hint( e ) {
 	var kind = $( '#kind' ).val();
 	var hint = $( '#hint' ).val();
-	if ( hint != '' ) $.post( '/post/hint/' + kind, { 'message': hint } );
+	if ( hint != '' ) $.post( '/post/answer', { 'message': hint, 'kind': kind, 'destination': 'pippo' } );
 	$( '#hint' ).val( '' );
 }
 $( document ).ready( function () {
 	var source = new EventSource( '/stream/questions' );
 	source.onmessage = function( e ) {
-		$( '#questions' ).after( e.data );
+		var data = JSON.parse( e.data );
+		$( '#questions' ).after( data.message );
 	};
 } );
 {% endblock %}
