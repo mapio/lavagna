@@ -15,10 +15,12 @@ body {
 	padding: .5em;
 }
 
-table.map { 
-	border: 1pt solid black;
+fieldset.map {
+	float: left;
+}
+
+table.map {
 	border-spacing: 1em;
-	margin: 1em;
 }
 table.map td[id] { 
 	border: 1pt solid black;

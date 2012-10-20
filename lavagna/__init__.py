@@ -63,17 +63,16 @@ def set_session( student, location ):
 	seat( student, location )
 	return redirect( url_for( 'student' ) )
 
-@app.route( '/t' )
-def teacher():
-	return render_template( 'teacher.html' )
-
-@app.route( '/map/<room>' )
-def map( room ):
-	try:
-		ret = render_template( 'maps/{0}.html'.format( room ) )
-	except TemplateNotFound:
-		abort( 404 )
-	return render_template( 'maps/base.html', maps = ret )
+@app.route( '/t/<maps>' )
+def teacher( maps ):
+	rooms =	maps.split( '+' )
+	ret = []
+	for room in rooms: 
+		try:
+			ret.append( render_template( 'maps/{0}.html'.format( room ) ) )
+		except TemplateNotFound:
+			abort( 404 )
+	return render_template( 'teacher.html', maps = '&nbsp;'.join( ret ) )
 
 if __name__ == '__main__':
 	app.debug = True

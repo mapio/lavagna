@@ -46,14 +46,19 @@ $( document ).ready( function () {
 	var source = new EventSource( '/stream/teacher' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
-		$( '#questions' ).after( d.question );
+		if ( d.event == 'question' )
+			$( '#questions' ).after( d.question );
+		else if ( d.event == 'seat' ){
+		
+		}
 	};
 } );
 {% endblock %}
 {% block body %}
 
 <div id="tooltip">&nbsp;</div>
-{{ maps|safe }}
+
+{{ maps|safe }}<div style="clear: both;"></div>
 
 <p>Hint:</p>
 <form action="#" method="post">
