@@ -45,11 +45,10 @@ $( document ).ready( function () {
 	var source = new EventSource( '/stream/teacher' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
-		elem = document.getElementById( d.location );
+		var elem = document.getElementById( d.location );
 		if ( ! elem ) return;
 		if ( d.event == 'question' ) {
 			questions[ d.location ] += '<li>' + d.question + '</li>';
-			console.log( elem.innerHTML );
 			elem.innerHTML = elem.innerHTML == '&nbsp;' ? 1 : parseInt( elem.innerHTML ) + 1;
 			elem.classList.add( 'question' );
 		} else if ( d.event == 'seat' ) {
@@ -64,7 +63,7 @@ $( document ).ready( function () {
 					elem.classList.remove( 'question' );
 					elem.innerHTML = '&nbsp';
 					questions[ d.location ] = '';
-					$.post( '/post/question', { 'question': '', 'location': d.location } );
+					$.post( '/post/clear_questions', { 	'location': d.location } );
 				}
 			} );
 			

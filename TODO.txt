@@ -1,2 +1,3 @@
-* messaggi privati
-* log messaggi passati
+* sistemare persistenza in modo che sia possibile cancellare
+* sistemare messaggi privati in modo che dipendano da token
+* sistemare acessi docente in modo che siano protetti
