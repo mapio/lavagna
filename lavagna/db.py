@@ -37,16 +37,20 @@ def seat( student, location ):
 	red.rpush( 'persist:teacher', data )
 
 def question( question, location ):
-	data = dumps( {
-		'event': 'question',
-		'student': studentat( location ),
-		'location': location,
-		'question': question,
-		'now': now()
-	} )
-	red.publish( 'teacher', data )
-	red.sadd( 'persist:teacher:questions', location )
-	red.rpush( 'persist:teacher:question:{0}'.format( location ), data )
+	if ( question ):
+		data = dumps( {
+			'event': 'question',
+			'student': studentat( location ),
+			'location': location,
+			'question': question,
+			'now': now()
+		} )
+		red.publish( 'teacher', data )
+		red.sadd( 'persist:teacher:questions', location )
+		red.rpush( 'persist:teacher:question:{0}'.format( location ), data )
+	else: # only the teacher can post empty questions
+		red.srem( 'persist:teacher:questions', location )
+		red.ltrim( 'persist:teacher:question:{0}'.format( location ), 1, 0 ) # start > end => delete
 
 def answer( answer, kind, destination ):
 	data = dumps( {

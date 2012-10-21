@@ -61,6 +61,7 @@ $( document ).ready( function () {
 			$( elem ).dblclick( function() {
 				elem.classList.remove( 'question' );
 				elem.innerHTML = '&nbsp';
+				$.post( '/post/question', { 'question': '', 'location': d.location } );
 			} );
 			
 		}

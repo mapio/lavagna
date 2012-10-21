@@ -37,6 +37,8 @@ body {
 
 #maps td.question {
 	background-color: red;
+	text-align: center;
+	font-size: 70%;
 }
 
 #maps td { 
