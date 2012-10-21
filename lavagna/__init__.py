@@ -33,9 +33,9 @@ def stream( channel ):
 @app.route( '/post/question', methods = [ 'POST' ] )
 def post_question():
 	if 'location' in request.form: # this happens when the teacher deletes questions
-		location = request.form[ 'location' ]
+		location = request.form[ 'location' ]
 	elif 'location' in session: 
-		location = session[ 'location' ]
+		location = session[ 'location' ]
 	else: abort( 404 )
 	if not 'question' in request.form: abort( 500 )
 	question( request.form[ 'question' ], location )

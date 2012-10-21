@@ -5,6 +5,7 @@ var student = new Object();
 var questions = new Object();
 var destination_student = null;
 var destination_location = null;
+var tooltip = null;
 
 function post_answer( e ) {
 	var kind = $( '#kind' ).val();
@@ -20,26 +21,25 @@ function set_destination( student, location ) {
 
 $( document ).ready( function () {
 
+	tooltip = document.getElementById( 'tooltip' );
  	destination_student = document.getElementById( 'destination_student' );
  	set_destination( '*', '*' );
  
 	$( 'td' ).mousemove( function ( event ) {
-		if ( $(this)[ 0 ].id ) {
-			s = student[ $(this)[ 0 ].id ];
+		var id = $(this)[ 0 ].id;
+		if ( id ) {
+			s = student[ id ];
 			if ( !s ) return;
-			q = questions[ $(this)[ 0 ].id ];
-			qs = '<b>'+ student[ $(this)[ 0 ].id ] +'</b><ul>';
-			for ( var i = 0; i < q.length; i++ ) qs += '<li>' + q[ i ];
-			qs += '</ul>';
-			$( '#tooltip' )[ 0 ].innerHTML = qs;
-			$( '#tooltip' ).css( {
+			tooltip.innerHTML = '<b>'+ s +'</b>'
+			if ( questions[ id ] != '' ) tooltip.innerHTML += '<ul>' + questions[ id ] + '</ul>';
+			$( tooltip ).css( {
 			    top: event.pageY + 5 + 'px',
 				left: event.pageX + 5 + 'px'
 			} ).show();
 		}		
 	} );
 	$( 'td' ).mouseleave( function () {
-		$( '#tooltip' ).hide();
+		$( tooltip ).hide();
 	} );
 	
 	var source = new EventSource( '/stream/teacher' );
@@ -48,20 +48,24 @@ $( document ).ready( function () {
 		elem = document.getElementById( d.location );
 		if ( ! elem ) return;
 		if ( d.event == 'question' ) {
-			questions[ d.location ].unshift( d.question );
-			elem.innerHTML = questions[ d.location ].length;
+			questions[ d.location ] += '<li>' + d.question + '</li>';
+			console.log( elem.innerHTML );
+			elem.innerHTML = elem.innerHTML == '&nbsp;' ? 1 : parseInt( elem.innerHTML ) + 1;
 			elem.classList.add( 'question' );
 		} else if ( d.event == 'seat' ) {
 			student[ d.location ] = d.student;
-			questions[ d.location ] = new Array();
+			questions[ d.location ] = '';
 			elem.classList.add( 'seated' );
 			$( elem ).click( function() {
 				set_destination( d.student, d.location );
 			} );
 			$( elem ).dblclick( function() {
-				elem.classList.remove( 'question' );
-				elem.innerHTML = '&nbsp';
-				$.post( '/post/question', { 'question': '', 'location': d.location } );
+				if ( elem.innerHTML != '&nbsp;' ) {
+					elem.classList.remove( 'question' );
+					elem.innerHTML = '&nbsp';
+					questions[ d.location ] = '';
+					$.post( '/post/question', { 'question': '', 'location': d.location } );
+				}
 			} );
 			
 		}
