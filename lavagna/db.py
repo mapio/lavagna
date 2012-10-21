@@ -60,8 +60,6 @@ def retrieve( stream, location = None ):
 		for event in events( sorted( questions, reverse = True ) ):
 			yield event
 	else: raise RuntimeError( 'Unknown stream: {0}'.format( stream ) )
-
-def NONE():	
 	pubsub = red.pubsub()
 	pubsub.subscribe( 'stream:{0}'.format( stream ) )
 	for message in pubsub.listen():
