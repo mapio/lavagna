@@ -58,6 +58,8 @@ body {
 	text-align: left;
 }
 
+/* Questions and answers */
+
 fieldset {
 	border:1px solid black;
 	margin-bottom: 1em;
@@ -78,6 +80,8 @@ legend {
 	font-size: 90%;
 	text-align: right;
 }
+
+/* Prettify */
 
 .str { color: #060; }
 .kwd { color: #006; font-weight: bold; }

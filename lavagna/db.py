@@ -14,7 +14,7 @@ def secret( realm ):
 
 def events( eids ):
 	keys = [ 'events:id:{0}'.format( i ) for i in eids ]
-	if keys: return ( e for e in red.mget( *keys ) )
+	if keys: return red.mget( *keys )
 	return []
 
 def publish( data ):
@@ -111,3 +111,38 @@ def answer( answer, kind, destination ):
 		'answer': answer,
 		'kind': kind
 	} )
+
+if __name__ == '__main__':
+	
+	def check( eid, event = None ):
+		eid = int( eid )
+		data = loads( events( [ eid ] )[ 0 ] )
+		if data[ 'eid' ] == eid and ( ( event and data[ 'event' ] == event ) or not event ):
+			del data[ 'eid' ]
+			event = data[ 'event' ] 
+			del data[ 'event' ]
+			now = data[ 'now' ]
+			del data[ 'now' ]
+			return eid, now, event, data
+		else:
+			return 'ERROR', data
+	
+	print 'Application secret:', red.get( 'secret:application' )
+	print 'Teacher secret:', red.get( 'secret:teacher' )
+	max_eid = int( red.get( 'events:id' ) )
+	event_ids = set( red.keys( 'events:id:*' ) )
+	sim_diff = event_ids.symmetric_difference( set( 'events:id:{0}'.format( i ) for i in range( 1, 1 + max_eid ) ) )
+	print 'Number of events:', max_eid,
+	print '(symmetric difference in ids: ', sim_diff, ')'
+	print 'Events:'
+	for eid, event in enumerate( events( range( 1, 1 + max_eid ) ) ):
+		print '\t', check( eid + 1 )
+	print 'Logins:'
+	for eid in red.smembers( 'logins:*' ):
+		print '\t', check( eid, 'login' )
+	print 'Questions:'
+	for key in red.keys( 'questions:*' ):
+		print '\t', key
+	print 'Answers:'
+	for key in red.keys( 'answers:*' ):
+		print '\t', key

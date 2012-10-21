@@ -9,4 +9,4 @@ from sys import argv
 location = argv[ 1 ]
 host = argv[ 2 ] if len( argv ) == 3 else 'hal.silab.di.unimi.it:8000'
 
-print urlopen( 'http://{0}/post/logout'.format( host ), urlencode( { 'location': location } ) ).read()
+print urlopen( 'http://{0}/t/logout'.format( host ), urlencode( { 'location': location } ) ).read()

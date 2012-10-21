@@ -10,13 +10,11 @@ import db
 
 app = Flask( __name__ )
 app.secret_key = db.secret( 'application' )
-
 app.config[ 'SESSION_COOKIE_HTTPONLY' ] = False
 
 # SSE endpoint
 
 @app.route( '/stream/<stream>' )
-# this must be secured using location and secret according to the stream
 def stream( stream ):
 	location = None
 	if stream == 'teacher':
@@ -43,7 +41,7 @@ def student_required( view ):
 
 @app.route( '/login/<student>/<location>', methods = [ 'GET' ] )
 @app.route( '/login', methods = [ 'GET', 'POST' ] )	
-def login( student = None, location = None ):
+def student_login( student = None, location = None ):
 	if request.method == 'POST':
 		f = request.form
 		if not 'location' in f: abort( 500 )
@@ -84,9 +82,9 @@ def teacher_required( view ):
 		return view( *args, **kwargs )
 	return _view
 
-@app.route( '/tlogin/<secret>', methods = [ 'GET' ] )
-@app.route( '/tlogin', methods = [ 'GET', 'POST' ] )	
-def tlogin( secret = None ):
+@app.route( '/t/login/<secret>', methods = [ 'GET' ] )
+@app.route( '/t/login', methods = [ 'GET', 'POST' ] )	
+def teacher_login( secret = None ):
 	if request.method == 'POST':
 		f = request.form
 		if not 'secret' in f: abort( 500 )
@@ -97,7 +95,7 @@ def tlogin( secret = None ):
 	session[ 'secret' ] = secret
 	return redirect( url_for( 'teacher' ) )
 
-@app.route( '/answer', methods = [ 'POST' ] )
+@app.route( '/t/answer', methods = [ 'POST' ] )
 @teacher_required
 def answer():
 	f = request.form
@@ -107,7 +105,7 @@ def answer():
 	db.answer( f[ 'answer' ], f[ 'kind' ], f[ 'destination' ] )
 	return ''
 
-@app.route( '/clear_questions', methods = [ 'POST' ] )
+@app.route( '/t/clear_questions', methods = [ 'POST' ] )
 @teacher_required
 def clear_questions():
 	if not 'location' in request.form: abort( 500 )
@@ -115,9 +113,9 @@ def clear_questions():
 	db.clear_questions( request.form[ 'location' ] )
 	return ''
 
-@app.route( '/logout/<location>')
+@app.route( '/t/logout/<location>')
 @teacher_required
-def logout( location ):
+def student_logout( location ):
 	db.logout( location )
 	return 'OK'
 
