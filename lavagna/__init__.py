@@ -101,8 +101,8 @@ def answer():
 	f = request.form
 	if not 'answer' in f: abort( 500 )
 	if not 'kind' in f: abort( 500 )
-	if not 'destination' in f: abort( 500 )
-	db.answer( f[ 'answer' ], f[ 'kind' ], f[ 'destination' ] )
+	if not 'location' in f: abort( 500 )
+	db.answer( f[ 'answer' ], f[ 'kind' ], f[ 'location' ] )
 	return ''
 
 @app.route( '/t/clear_questions', methods = [ 'POST' ] )

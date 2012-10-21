@@ -3,20 +3,20 @@
 
 var student = new Object();
 var questions = new Object();
-var destination_student = null;
-var destination_location = null;
+var location_student = null;
+var location_location = null;
 var tooltip = null;
 
 function post_answer( e ) {
 	var kind = $( '#kind' ).val();
 	var answer = $( '#answer' ).val();
-	if ( answer != '' ) $.post( '{{ url_for( 'answer' ) }}', { 'answer': answer, 'kind': kind, 'destination': destination_location } );
+	if ( answer != '' ) $.post( '{{ url_for( 'answer' ) }}', { 'answer': answer, 'kind': kind, 'location': location_location } );
 	$( '#answer' ).val( '' );
 }
 
-function set_destination( student, location ) {
-	destination_student.value = student;
-	destination_location = location;
+function set_location( student, location ) {
+	location_student.value = student;
+	location_location = location;
 }
 
 function set_tooltip( id ) {
@@ -30,8 +30,8 @@ function set_tooltip( id ) {
 $( document ).ready( function () {
 
 	tooltip = document.getElementById( 'tooltip' );
- 	destination_student = document.getElementById( 'destination_student' );
- 	set_destination( '*', '*' );
+ 	location_student = document.getElementById( 'location_student' );
+ 	set_location( '*', '*' );
  
 	$( 'td[id]' ).mousemove( function ( event ) {
 		var id = $( this )[ 0 ].id;
@@ -56,18 +56,17 @@ $( document ).ready( function () {
 			questions[ d.location ] = '';
 			elem.classList.add( 'seated' );
 			$( elem ).click( function() {
-				set_destination( d.student, d.location );
+				set_location( d.student, d.location );
 			} );
 			$( elem ).dblclick( function() {
-				if ( elem.innerHTML != '&nbsp;' ) {
-					elem.classList.remove( 'question' );
-					elem.innerHTML = '&nbsp';
-					questions[ d.location ] = '';
-					set_tooltip( elem.id );
-					$.post( '{{ url_for( 'clear_questions' ) }}', { 	'location': d.location } );
-				}
-			} );
-			
+				if ( elem.innerHTML != '&nbsp;' )
+					$.post( '{{ url_for( 'clear_questions' ) }}', { 'location': d.location } );
+			} );	
+		} else if ( d.event == 'clear_questions' ) {
+			elem.classList.remove( 'question' );
+			elem.innerHTML = '&nbsp;';
+			questions[ d.location ] = '';
+			set_tooltip( elem.id );			
 		}
 	}
 } );
@@ -80,7 +79,7 @@ $( document ).ready( function () {
 <div id="maps">{{ rooms|safe }}</div>
 
 <form action="#" method="post">
-	Destination: <input id="destination_student" type="text" disabled><button type="button" onclick="set_destination( '*', '*' ); return false;">broadcast</button><br/>
+	location: <input id="location_student" type="text" disabled><button type="button" onclick="set_location( '*', '*' ); return false;">broadcast</button><br/>
 	<textarea rows=4 cols=80 id="answer"></textarea>
 	<select id="kind">
 		<option selected>text</option>

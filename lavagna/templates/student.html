@@ -4,9 +4,9 @@ $( document ).ready( function () {
 	var source = new EventSource( '{{ url_for( 'stream', stream ='student' ) }}' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
-		if ( d.destination == '*' )
+		if ( d.location == '*' )
 			content = '<fieldset class="public"><legend>';
-		else if ( d.destination == '{{ location }}' )
+		else if ( d.location == '{{ location }}' )
 			content = '<fieldset class="private"><legend>';
 		else return;
 		content += d.now + '</legend>';
