@@ -51,7 +51,7 @@ $( document ).ready( function () {
 			questions[ d.location ] += '<li>' + d.question + '</li>';
 			elem.innerHTML = elem.innerHTML == '&nbsp;' ? 1 : parseInt( elem.innerHTML ) + 1;
 			elem.classList.add( 'question' );
-		} else if ( d.event == 'seat' ) {
+		} else if ( d.event == 'login' ) {
 			student[ d.location ] = d.student;
 			questions[ d.location ] = '';
 			elem.classList.add( 'seated' );

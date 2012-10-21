@@ -11,19 +11,20 @@ def now():
 
 def events( eids ):
 	keys = [ 'events:id:{0}'.format( i ) for i in eids ]
-	print "K", keys
-	return ( e for e in red.mget( *keys ) )
+	if keys: return ( e for e in red.mget( *keys ) )
+	return []
 
 def publish( data ):
 	eid = red.incr( 'events:id' )
 	data[ 'eid' ] = eid
 	data[ 'now' ] = now()
-	red.set( 'events:id:{0}'.format( eid ), dumps( data ) )
+	jdata = dumps( data )
+	red.set( 'events:id:{0}'.format( eid ), jdata )
 	event = data[ 'event' ]
 	if event == 'answer':
-		red.publish( 'stream:student', data )
+		red.publish( 'stream:student', jdata )
 	else:
-		red.publish( 'stream:teacher', data )
+		red.publish( 'stream:teacher', jdata )
 	if event == 'login':
 		student, location = data[ 'student' ], data[ 'location' ]
 		red.sadd( 'logins:*', eid )
@@ -32,7 +33,7 @@ def publish( data ):
 		red.delete( 'answers:{0}'.format( location ) )
 	elif event == 'logout':
 		location = data[ 'location' ]
-		eid_todel = red.get( 'logins:{0}'.format( location ) )
+		eid_todel = red.get( 'login:{0}'.format( location ) )
 		red.srem( 'logins:*', eid_todel )
 		red.delete( 'login:{0}'.format( location ) )
 		red.delete( 'questions:{0}'.format( location ) )
@@ -49,7 +50,7 @@ def retrieve( stream, location = None ):
 	if stream == 'student':
 		broadcasted = red.smembers( 'answers:*' )
 		private = red.smembers( 'answers:{0}'.format( location ) )
-		for event in events( sorted( broadcasted | private, reverse = True ) ):
+		for event in events( sorted( broadcasted | private ) ):
 			yield event
 	elif stream == 'teacher':
 		questions = set()
@@ -88,6 +89,9 @@ def logout( location ):
 		'student': student,
 		'location': location,
 	} )
+
+def clear_questions( location ):
+	red.delete( 'questions:{0}'.format( location ) )
 
 def question( question, location ):
 	publish( {
