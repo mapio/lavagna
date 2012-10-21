@@ -51,6 +51,11 @@ $( document ).ready( function () {
 			questions[ d.location ] += '<li>' + d.question + '</li>';
 			elem.innerHTML = elem.innerHTML == '&nbsp;' ? 1 : parseInt( elem.innerHTML ) + 1;
 			elem.classList.add( 'question' );
+		} else if ( d.event == 'clear_questions' ) {
+			elem.classList.remove( 'question' );
+			elem.innerHTML = '&nbsp;';
+			questions[ d.location ] = '';
+			set_tooltip( elem.id );
 		} else if ( d.event == 'login' ) {
 			student[ d.location ] = d.student;
 			questions[ d.location ] = '';
@@ -61,12 +66,13 @@ $( document ).ready( function () {
 			$( elem ).dblclick( function() {
 				if ( elem.innerHTML != '&nbsp;' )
 					$.post( '{{ url_for( 'clear_questions' ) }}', { 'location': d.location } );
-			} );	
-		} else if ( d.event == 'clear_questions' ) {
-			elem.classList.remove( 'question' );
-			elem.innerHTML = '&nbsp;';
+			} );
+		} else if ( d.event == 'logout' ) {
+			student[ d.location ] = null;
 			questions[ d.location ] = '';
-			set_tooltip( elem.id );			
+			elem.classList.remove( 'seated' );
+			$( elem ).unbind( 'click' );
+			$( elem ).unbind( 'dblclick' );
 		}
 	}
 } );
