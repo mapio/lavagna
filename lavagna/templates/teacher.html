@@ -7,13 +7,6 @@ var location_student = null;
 var location_location = null;
 var tooltip = null;
 
-function post_answer( e ) {
-	var kind = $( '#kind' ).val();
-	var answer = $( '#answer' ).val();
-	if ( answer != '' ) $.post( '{{ url_for( 'answer' ) }}', { 'answer': answer, 'kind': kind, 'location': location_location } );
-	$( '#answer' ).val( '' );
-}
-
 function set_location( student, location ) {
 	location_student.value = student;
 	location_location = location;
@@ -30,8 +23,18 @@ function set_tooltip( id ) {
 $( document ).ready( function () {
 
 	tooltip = document.getElementById( 'tooltip' );
- 	location_student = document.getElementById( 'location_student' );
- 	set_location( '*', '*' );
+	location_student = document.getElementById( 'location_student' );
+	set_location( '*', '*' );
+
+	$('textarea').keyup( function ( event ) {
+		if ( event.keyCode == 13 && event.shiftKey ) {
+			var kind = $( '#kind' ).val();
+			var answer = $( '#answer' ).val();
+			if ( answer != '' ) $.post( '{{ url_for( 'answer' ) }}', { 'answer': answer, 'kind': kind, 'location': location_location } );
+			$( '#answer' ).val( '' );
+			event.stopPropagation();
+	  }
+	 });
  
 	$( 'td[id]' ).mousemove( function ( event ) {
 		var id = $( this )[ 0 ].id;
@@ -85,14 +88,13 @@ $( document ).ready( function () {
 <div id="maps">{{ rooms|safe }}</div>
 
 <form action="#" method="post">
-	location: <input id="location_student" type="text" disabled><button type="button" onclick="set_location( '*', '*' ); return false;">broadcast</button><br/>
-	<textarea rows=4 cols=80 id="answer"></textarea>
+	Location: <input id="location_student" type="text" disabled><button type="button" onclick="set_location( '*', '*' ); return false;">broadcast</button>,
 	<select id="kind">
 		<option selected>text</option>
 		<option>code</option>
 		<option>html</option>
 	</select>
-	<button type="button" onclick="post_answer(); return false;">Post</button>
+	<br/><textarea rows=20 cols=120 id="answer"></textarea>
 </form>
 
 {% endblock %}
