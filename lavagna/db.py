@@ -9,68 +9,100 @@ red = StrictRedis( unix_socket_path = './data/redis.sock' )
 def now():
 	return datetime.now().replace( microsecond = 0 ).time().isoformat()
 
-def messages( channel ):
-	for data in red.lrange( 'persist:{0}'.format( channel ), 0, -1 ):
-		yield data
-	if ( channel == 'teacher' ):
-		for location in red.smembers( 'persist:teacher:questions' ):
-			for data in red.lrange( 'persist:teacher:question:{0}'.format( location ), 0, -1 ):
-				yield data
+def events( eids ):
+	keys = [ 'events:id:{0}'.format( i ) for i in eids ]
+	print "K", keys
+	return ( e for e in red.mget( *keys ) )
+
+def publish( data ):
+	eid = red.incr( 'events:id' )
+	data[ 'eid' ] = eid
+	data[ 'now' ] = now()
+	red.set( 'events:id:{0}'.format( eid ), dumps( data ) )
+	event = data[ 'event' ]
+	if event == 'answer':
+		red.publish( 'stream:student', data )
+	else:
+		red.publish( 'stream:teacher', data )
+	if event == 'login':
+		student, location = data[ 'student' ], data[ 'location' ]
+		red.sadd( 'logins:*', eid )
+		red.set( 'login:{0}'.format( location ), eid )
+		red.delete( 'questions:{0}'.format( location ) )
+		red.delete( 'answers:{0}'.format( location ) )
+	elif event == 'logout':
+		location = data[ 'location' ]
+		eid_todel = red.get( 'logins:{0}'.format( location ) )
+		red.srem( 'logins:*', eid_todel )
+		red.delete( 'login:{0}'.format( location ) )
+		red.delete( 'questions:{0}'.format( location ) )
+		red.delete( 'answers:{0}'.format( location ) )
+	elif event == 'question':
+		location = data[ 'location' ]
+		red.sadd( 'questions:{0}'.format( location ), eid )
+	elif event == 'answer':
+		destination = data[ 'destination' ]
+		red.sadd( 'answers:{0}'.format( destination ), eid )
+	else: raise RuntimeError( 'Unknown event: {0}'.format( event ) )
+
+def retrieve( stream, location = None ):
+	if stream == 'student':
+		broadcasted = red.smembers( 'answers:*' )
+		private = red.smembers( 'answers:{0}'.format( location ) )
+		for event in events( sorted( broadcasted | private, reverse = True ) ):
+			yield event
+	elif stream == 'teacher':
+		questions = set()
+		for event in events( red.smembers( 'logins:*' ) ):
+			location = loads( event )[ 'location' ]
+			questions |= red.smembers( 'questions:{0}'.format( location ) )
+			yield event
+		for event in events( sorted( questions, reverse = True ) ):
+			yield event
+	else: raise RuntimeError( 'Unknown stream: {0}'.format( stream ) )
+
+def NONE():	
 	pubsub = red.pubsub()
-	pubsub.subscribe( channel )
+	pubsub.subscribe( 'stream:{0}'.format( stream ) )
 	for message in pubsub.listen():
 		if message[ 'type' ] != 'message': continue
 		yield message[ 'data' ]
-	
-def studentat( location ):
-	return red.get( 'studentat:{0}'.format( location ) )
 
-def seat( student, location ):
-	if studentat( location ) == student: return
-	red.set( 'studentat:{0}'.format( location ), student )
-	data = dumps( {
-		'event': 'seat',
+def logged( location ):
+	eid = red.get( 'login:{0}'.format( location ) )
+	if not eid: return None
+	student = loads( red.get( 'events:id:{0}'.format( eid ) ) )[ 'student' ]
+	return student
+
+def login( student, location ):
+	if logged( location ) == student: return
+	publish( {
+		'event': 'login',
 		'student': student,
 		'location': location,
 	} )
-	clear_questions( location )
-	red.publish( 'teacher', data )
-	red.rpush( 'persist:teacher', data )
 
-def clear_seat( location ):
-	student = studentat( location )
+def logout( location ):
+	student = logged( location )
 	if ( not student ): return
-	data = dumps( {
-		'event': 'seat',
+	publish( {
+		'event': 'logout',
 		'student': student,
 		'location': location,
 	} )
-	red.delete( 'studentat:{0}'.format( location ) )
-	clear_questions( location )
-	red.lrem( 'persist:teacher', 1, data )
 
 def question( question, location ):
-	data = dumps( {
+	publish( {
 		'event': 'question',
-		'student': studentat( location ),
+		'student': logged( location ),
 		'location': location,
-		'question': question,
-		'now': now()
+		'question': question
 	} )
-	red.publish( 'teacher', data )
-	red.sadd( 'persist:teacher:questions', location )
-	red.rpush( 'persist:teacher:question:{0}'.format( location ), data )
-
-def clear_questions( location ):
-	red.srem( 'persist:teacher:questions', location )
-	red.ltrim( 'persist:teacher:question:{0}'.format( location ), 1, 0 )
 
 def answer( answer, kind, destination ):
-	data = dumps( {
-		'answer': answer,
-		'kind': kind,
+	publish( {
+		'event': 'answer',
 		'destination': destination,
-		'now': now()
+		'answer': answer,
+		'kind': kind
 	} )
-	red.publish( 'student', data )
-	red.rpush( 'persist:student', data )
