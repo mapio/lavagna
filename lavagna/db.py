@@ -9,6 +9,9 @@ red = StrictRedis( unix_socket_path = './data/redis.sock' )
 def now():
 	return datetime.now().replace( microsecond = 0 ).time().isoformat()
 
+def secret( realm ):
+	return red.get( 'secret:{0}'.format( realm ) )
+
 def events( eids ):
 	keys = [ 'events:id:{0}'.format( i ) for i in eids ]
 	if keys: return ( e for e in red.mget( *keys ) )

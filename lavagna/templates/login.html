@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+<form action="{{ url_for( 'login' ) }}" method="post">
+	Student: <input type="text" name="student">, 
+	location: <input type="text" name="location">,
+	token: <input type="text" name="token">
+	<input type=submit value="login">
+</form>
+{% endblock %}

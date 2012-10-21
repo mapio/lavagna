@@ -10,7 +10,7 @@ var tooltip = null;
 function post_answer( e ) {
 	var kind = $( '#kind' ).val();
 	var answer = $( '#answer' ).val();
-	if ( answer != '' ) $.post( '/post/answer', { 'answer': answer, 'kind': kind, 'destination': destination_location } );
+	if ( answer != '' ) $.post( '{{ url_for( 'answer' ) }}', { 'answer': answer, 'kind': kind, 'destination': destination_location } );
 	$( '#answer' ).val( '' );
 }
 
@@ -19,30 +19,30 @@ function set_destination( student, location ) {
 	destination_location = location;
 }
 
+function set_tooltip( id ) {
+	s = student[ id ];
+	if ( !s ) return false;
+	tooltip.innerHTML = '<b>'+ s +'</b>'
+	if ( questions[ id ] != '' ) tooltip.innerHTML += '<ul>' + questions[ id ] + '</ul>';
+	return true;
+}
+
 $( document ).ready( function () {
 
 	tooltip = document.getElementById( 'tooltip' );
  	destination_student = document.getElementById( 'destination_student' );
  	set_destination( '*', '*' );
  
-	$( 'td' ).mousemove( function ( event ) {
-		var id = $(this)[ 0 ].id;
-		if ( id ) {
-			s = student[ id ];
-			if ( !s ) return;
-			tooltip.innerHTML = '<b>'+ s +'</b>'
-			if ( questions[ id ] != '' ) tooltip.innerHTML += '<ul>' + questions[ id ] + '</ul>';
-			$( tooltip ).css( {
-			    top: event.pageY + 5 + 'px',
-				left: event.pageX + 5 + 'px'
-			} ).show();
-		}		
+	$( 'td[id]' ).mousemove( function ( event ) {
+		var id = $( this )[ 0 ].id;
+		if ( set_tooltip( id ) ) $( tooltip ).css( {
+		    top: event.pageY + 5 + 'px',
+			left: event.pageX + 5 + 'px'
+		} ).show();
 	} );
-	$( 'td' ).mouseleave( function () {
-		$( tooltip ).hide();
-	} );
+	$( 'td[id]' ).mouseleave( function () { $( tooltip ).hide(); } );
 	
-	var source = new EventSource( '/stream/teacher' );
+	var source = new EventSource( '{{ url_for( 'stream', stream ='teacher' ) }}' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
 		var elem = document.getElementById( d.location );
@@ -63,7 +63,8 @@ $( document ).ready( function () {
 					elem.classList.remove( 'question' );
 					elem.innerHTML = '&nbsp';
 					questions[ d.location ] = '';
-					$.post( '/post/clear_questions', { 	'location': d.location } );
+					set_tooltip( elem.id );
+					$.post( '{{ url_for( 'clear_questions' ) }}', { 	'location': d.location } );
 				}
 			} );
 			
