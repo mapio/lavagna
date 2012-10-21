@@ -37,6 +37,7 @@ def post_question():
 	elif 'location' in session: 
 		location = session[ 'location' ]
 	else: abort( 404 )
+	if not studentat( location ): abort( 500 )
 	if not 'question' in request.form: abort( 500 )
 	question( request.form[ 'question' ], location )
 	return ''
@@ -46,13 +47,16 @@ def student():
 	if not 'location' in session: abort( 404 )
 	location = session[ 'location' ]
 	student = studentat( location )
+	if not student: abort( 500 )
 	return render_template( 'student.html', student = student, location = location )
 
+@app.route( '/seat/<location>' ) # this empties the seat (and deletes questions)
 @app.route( '/seat/<student>/<location>' )
-def set_session( student, location ):
+def set_session( location, student = None ):
 	session[ 'location' ] = location
 	seat( student, location )
-	return redirect( url_for( 'student' ) )
+	if student: return redirect( url_for( 'student' ) )
+	else: return ''
 
 @app.route( '/t/<rooms>' )
 def teacher( rooms ):
