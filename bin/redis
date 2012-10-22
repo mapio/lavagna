@@ -7,6 +7,10 @@ if [ "$1" == "start" ]; then
 	redis-cli -s ./data/redis.sock info | grep uptime
 elif [ "$1" == "status" ]; then
 	redis-cli  -s ./data/redis.sock info | grep uptime
+elif [ "$1" == "clean_restart" ]; then
+	./bin/redis stop
+	rm -rf ./data/redis.*
+	./bin/redis start
 else
 	if [ -r ./data/redis.pid ]; then
 		tail -n 0 -f ./data/redis.log & pid=$!
