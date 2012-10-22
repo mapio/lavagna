@@ -26,4 +26,4 @@ from sys import argv
 secret = open( './etc/teacher_secret.txt' ).read().strip()
 host = argv[ 1 ] if len( argv ) == 2 else 'hal.silab.di.unimi.it:8000'
 
-open_new( 'http://{0}/t/login/{1}'.format( host, secrets ) )
+open_new( 'http://{0}/t/login/{1}'.format( host, secret ) )

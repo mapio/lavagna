@@ -18,6 +18,7 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
 if [ "$1" == "start" ]; then
+	mkdir -p ./data
 	rm -f ./data/redis.*
 	redis-server ./etc/redis.conf
 	sleep 1
