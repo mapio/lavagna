@@ -117,7 +117,7 @@ def clear_questions():
 @teacher_required
 def student_logout( location ):
 	db.logout( location )
-	return 'OK'
+	return redirect( url_for( 'teacher' ) )
 
 @app.route( '/t/<rooms>' )
 @app.route( '/t' )
