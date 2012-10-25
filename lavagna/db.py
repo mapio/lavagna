@@ -81,7 +81,7 @@ def retrieve( stream, location = None ):
 			location = loads( event )[ 'location' ]
 			questions |= red.smembers( 'questions:{0}'.format( location ) )
 			yield event
-		for event in events( sorted( questions, reverse = True ) ):
+		for event in events( sorted( questions ) ):
 			yield event
 	else: raise RuntimeError( 'Unknown stream: {0}'.format( stream ) )
 	pubsub = red.pubsub()
