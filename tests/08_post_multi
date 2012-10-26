@@ -1,0 +1,4 @@
+for i in 0 1 2 3 4 5 6 7 8 9 10 11; do
+	curl -D ./data/test.headers -b data/cookies.teacher -d kind=text -d location='*' -d answer="TEST_MULTI" -s http://localhost:8000/t/answer
+	if ! grep -q 'HTTP/1.1 200 OK' ./data/test.headers; then exit 1; fi
+done

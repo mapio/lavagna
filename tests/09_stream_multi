@@ -1,0 +1,1 @@
+grep TEST_MULTI <( curl -m 1 -b data/cookies.student -s http://localhost:8000/stream/student ) | perl -pe 's/.*"eid":([^,]*),.*/\1/' | sort -cn

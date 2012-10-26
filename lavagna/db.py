@@ -73,7 +73,7 @@ def retrieve( stream, location = None ):
 	if stream == 'student':
 		broadcasted = red.smembers( 'answers:*' )
 		private = red.smembers( 'answers:{0}'.format( location ) )
-		for event in events( sorted( broadcasted | private ) ):
+		for event in events( sorted( map( int, broadcasted | private ) ) ):
 			yield event
 	elif stream == 'teacher':
 		questions = set()
@@ -81,7 +81,7 @@ def retrieve( stream, location = None ):
 			location = loads( event )[ 'location' ]
 			questions |= red.smembers( 'questions:{0}'.format( location ) )
 			yield event
-		for event in events( sorted( questions ) ):
+		for event in events( sorted( map( int, questions ) ) ):
 			yield event
 	else: raise RuntimeError( 'Unknown stream: {0}'.format( stream ) )
 	pubsub = red.pubsub()
