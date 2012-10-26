@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
-<form action="{{ url_for( 'tlogin' ) }}" method="post">
-	Secret: <input type="text" name="secret">
+<form action="{{ url_for( 'teacher_login' ) }}" method="post">
+	Secret: <input type="password" name="secret">
 	<input type=submit value="login">
 </form>
 {% endblock %}

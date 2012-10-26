@@ -22,12 +22,12 @@ if [ "$1" == "start" ]; then
 	rm -f ./data/redis.*
 	redis-server ./etc/redis.conf
 	sleep 1
+	chmod go= ./data/redis.*
 	redis-cli -s ./data/redis.sock info | grep uptime
 elif [ "$1" == "status" ]; then
 	redis-cli  -s ./data/redis.sock info | grep uptime
-elif [ "$1" == "clean_restart" ]; then
+elif [ "$1" == "restart" ]; then
 	./bin/redis stop
-	rm -rf ./data/redis.*
 	./bin/redis start
 else
 	if [ -r ./data/redis.pid ]; then

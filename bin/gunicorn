@@ -23,6 +23,7 @@ if [ "$1" == "start" ]; then
 	tail -n 0 -f ./data/gunicorn.errors & pid=$!
 	gunicorn -c ./etc/gunicorn.conf lavagna:app
 	sleep 1
+	chmod go= ./data/gunicorn.*
 	kill $pid
 elif [ "$1" == "status" ]; then
 	tail ./data/gunicorn.{errors,accesses}

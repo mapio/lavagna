@@ -20,14 +20,32 @@ from ConfigParser import RawConfigParser
 from functools import wraps
 from json import dumps
 
-from flask import Flask, render_template, request, Response, abort, session, redirect, url_for
+from flask import Flask, render_template, request, Response, abort, session, redirect, url_for, g
 from jinja2.exceptions import TemplateNotFound
 
 import db
 
 app = Flask( __name__ )
-app.secret_key = db.secret( 'application' )
-app.config[ 'SESSION_COOKIE_HTTPONLY' ] = False
+app.config.update(
+	DEBUG = True, TESTING = True,
+    SECRET_KEY = db.secret( 'application' ),
+	SECRET_TEACHER = db.secret( 'teacher' ),
+	SECRET_STUDENTS = db.secret( 'students' ),
+	SESSION_COOKIE_HTTPONLY = False,
+)
+
+@app.before_request
+def before_request():
+	g.teacher = False
+	g.location, g.student = None, None
+	print session
+	if 'location' in session:
+		g.location, g.student = session[ 'location' ], db.logged( session[ 'location' ] )
+		if not ( g.location and g.student ):
+			del session[ 'location' ]
+			g.location, g.student = None, None
+	if 'secret' in session:
+		g.teacher = session[ 'secret' ] == app.config[ 'SECRET_TEACHER' ]
 
 # SSE endpoint
 
@@ -52,22 +70,24 @@ def stream( stream ):
 def student_required( view ):
 	@wraps( view )
 	def _view( *args, **kwargs ):
-		if not 'location' in session: return redirect( url_for( 'login' ) )
+		if not g.location: return redirect( url_for( 'student_login' ) )
 		return view( *args, **kwargs )
 	return _view
 
-@app.route( '/login/<student>/<location>', methods = [ 'GET' ] )
+@app.route( '/login/<student>/<location>/<secret>', methods = [ 'GET' ] )
 @app.route( '/login', methods = [ 'GET', 'POST' ] )	
-def student_login( student = None, location = None ):
+def student_login( student = None, location = None, secret = None ):
 	if request.method == 'POST':
 		f = request.form
 		if not 'location' in f: abort( 500 )
 		if not 'student' in f: abort( 500 )
-		if not 'token' in f: abort( 500 )
+		if not 'secret' in f: abort( 500 )
 		location = f[ 'location' ]
 		student = f[ 'student' ]
+		secret = f[ 'secret' ]
 	if request.method == 'GET':
-		if not ( student and location ): return render_template( 'login.html' )
+		if not ( student and location and secret ): return render_template( 'login.html' )
+	if secret != app.config[ 'SECRET_STUDENTS' ]: abort( 403 )
 	session[ 'location' ] = location
 	db.login( student, location )
 	return redirect( url_for( 'student' ) )
@@ -75,19 +95,13 @@ def student_login( student = None, location = None ):
 @app.route( '/' )
 @student_required
 def student():
-	location = session[ 'location' ]
-	student = db.logged( location )
-	if not student:
-		del session[ 'location' ]
-		abort( 404 )
-	return render_template( 'student.html', student = student, location = location )
+	return render_template( 'student.html' )
 
 @app.route( '/question', methods = [ 'POST' ] )
 @student_required
 def question():
-	if not db.logged( session[ 'location' ] ): abort( 500 )
 	if not 'question' in request.form: abort( 500 )
-	db.question( request.form[ 'question' ], session[ 'location' ] )
+	db.question( request.form[ 'question' ], g.location )
 	return ''
 
 # Teacher's endpoints
@@ -95,7 +109,7 @@ def question():
 def teacher_required( view ):
 	@wraps( view )
 	def _view( *args, **kwargs ):
-		if not 'secret' in session or session[ 'secret' ] != db.secret( 'teacher' ): return redirect( url_for( 'tlogin' ) )
+		if not g.teacher: return redirect( url_for( 'teacher_login' ) )
 		return view( *args, **kwargs )
 	return _view
 
@@ -108,7 +122,7 @@ def teacher_login( secret = None ):
 		secret = f[ 'secret' ]
 	if request.method == 'GET':
 		if not secret: return render_template( 'tlogin.html' )
-	if secret != db.secret( 'teacher' ): abort( 404 )
+	if secret != app.config[ 'SECRET_TEACHER' ]: abort( 403 )
 	session[ 'secret' ] = secret
 	return redirect( url_for( 'teacher' ) )
 
