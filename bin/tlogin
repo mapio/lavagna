@@ -23,7 +23,7 @@ from pwd import getpwuid
 from webbrowser import open_new
 from sys import argv
 
-secret = open( './data/secret.teachers' ).read().strip()
+secret = open( './data/secret.teacher' ).read().strip()
 host = argv[ 1 ] if len( argv ) == 2 else 'hal.silab.di.unimi.it:8000'
 
 open_new( 'http://{0}/t/login/{1}'.format( host, secret ) )
