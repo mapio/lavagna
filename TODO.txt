@@ -1,1 +1,2 @@
 * adopt Twitter Bootstrap
+* check that eids are sorted as numbers but are strings
