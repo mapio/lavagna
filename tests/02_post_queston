@@ -1,0 +1,5 @@
+question="QUESTION-$RANDOM"
+echo $question > ./data/test.question
+
+curl -D ./data/test.headers -b data/cookies.student -d question="$question" -s http://localhost:8000/question
+grep -q 'HTTP/1.1 200 OK' ./data/test.headers

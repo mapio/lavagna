@@ -1,0 +1,5 @@
+answer="ANSWER-$RANDOM"
+echo $answer > ./data/test.answer
+
+curl -D ./data/test.headers -b data/cookies.teacher -d kind=text -d location='TEST_LOCATION' -d answer="$answer" -s http://localhost:8000/t/answer
+grep -q 'HTTP/1.1 200 OK' ./data/test.headers

@@ -1,0 +1,5 @@
+bcast="BCAST-$RANDOM"
+echo $bcast > ./data/test.bcast
+
+curl -D ./data/test.headers -b data/cookies.teacher -d kind=text -d location='*' -d answer="$bcast" -s http://localhost:8000/t/answer
+grep -q 'HTTP/1.1 200 OK' ./data/test.headers

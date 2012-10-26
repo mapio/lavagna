@@ -1,0 +1,1 @@
+grep -q "$(cat ./data/test.question)" <( curl -m 1 -b data/cookies.teacher -s http://localhost:8000/stream/teacher )

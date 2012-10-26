@@ -1,0 +1,1 @@
+grep -q '<b>TEST_STUDENT</b> @ <b>TEST_LOCATION</b>' <( curl -c ./data/cookies.student -sL http://localhost:8000/login/TEST_STUDENT/TEST_LOCATION/$( cat ./data/secret.students ) )
