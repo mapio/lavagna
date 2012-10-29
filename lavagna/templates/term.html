@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block extrahead %}
+<style>
+  .terminal {
+    float: left;
+    border: #000 solid 5px;
+    font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+    font-size: 16px;
+    color: #f0f0f0;
+    background: #000;
+  }
+  .reverse-video {
+    color: #000;
+    background: #f0f0f0;
+  }
+</style>
+<script src="{{ url_for( 'static', filename = 'term.js' ) }}"></script>
+{% endblock %}
+{% block script %}
+$( document ).ready( function () {
+	term = new Terminal( 132, 40 );
+	term.open();
+	var source = new EventSource( '{{ url_for( 'stream', stream = 'term' ) }}' );
+	source.onmessage = function( e ) {
+		var d = JSON.parse( e.data );
+		term.write( d[ 'payload' ] );
+	}
+} );
+{% endblock %}

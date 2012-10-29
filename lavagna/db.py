@@ -83,6 +83,8 @@ def retrieve( stream, location = None ):
 			yield event
 		for event in events( sorted( map( int, questions ) ) ):
 			yield event
+	elif stream == 'term':
+		pass
 	else: raise RuntimeError( 'Unknown stream: {0}'.format( stream ) )
 	pubsub = red.pubsub()
 	pubsub.subscribe( 'stream:{0}'.format( stream ) )
