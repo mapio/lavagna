@@ -1,0 +1,13 @@
+N=100
+pid=()
+rm -rf ./data/test.headers.*
+for (( i = 0; i < $N; i++ )); do
+	curl -D ./data/test.headers.$i -m 10 -b data/cookies.student -s http://localhost:8000/stream/student >/dev/null & pid=(${pid[@]} $!)
+done
+for (( i = 0; i < ${#pid[@]}; i++ )); do
+	wait ${pid[$i]}
+done
+for (( i = 0; i < $N; i++ )); do
+	if ! grep -q 'HTTP/1.1 200 OK' ./data/test.headers.$i; then return 1; fi
+done
+return 0
