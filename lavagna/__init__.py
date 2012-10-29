@@ -38,7 +38,6 @@ app.config.update(
 def before_request():
 	g.teacher = False
 	g.location, g.student = None, None
-	print session
 	if 'location' in session:
 		g.location, g.student = session[ 'location' ], db.logged( session[ 'location' ] )
 		if not ( g.location and g.student ):
@@ -57,6 +56,8 @@ def stream( stream ):
 	elif stream == 'student':
 		if not 'location' in session: abort( 500 )
 		else: location = session[ 'location' ]
+	elif stream == 'term':
+		pass
 	else: abort( 500 )
 	def event_stream():
 		for data in db.retrieve( stream, location ):
@@ -159,6 +160,12 @@ def teacher( rooms = 'guests' ):
 	except TemplateNotFound:
 		abort( 404 )
 	return render_template( 'teacher.html', rooms = ' '.join( t ) )
+
+# Terminal experiments
+
+@app.route( '/term' )
+def term():
+	return render_template( 'term.html' )
 
 if __name__ == '__main__':
 	app.debug = True

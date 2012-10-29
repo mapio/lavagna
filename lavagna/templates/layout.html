@@ -5,6 +5,7 @@
 		<link href="{{ url_for( 'static', filename='lavagna.css' ) }}" type="text/css" rel="stylesheet">
 		<script src="{{ url_for( 'static', filename='pp.js' ) }}"></script>
 		<script src="{{ url_for( 'static', filename='jquery.js' ) }}"></script>
+		{% block extrahead %}{% endblock %}
 		<script>{% block script %}{% endblock %}</script>
 	</head>
 	<body>{% block body %}{% endblock %}</body>

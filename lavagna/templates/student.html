@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block script %}
 $( document ).ready( function () {
-	var source = new EventSource( '{{ url_for( 'stream', stream ='student' ) }}' );
+	var source = new EventSource( '{{ url_for( 'stream', stream = 'student' ) }}' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
 		if ( d.location == '*' )
