@@ -45,7 +45,7 @@ $( document ).ready( function () {
 	} );
 	$( 'td[id]' ).mouseleave( function () { $( tooltip ).hide(); } );
 	
-	var source = new EventSource( '{{ url_for( 'stream', stream ='teacher' ) }}' );
+	var source = new EventSource( '{{ url_for( 'stream', stream = 'teacher' ) }}' );
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
 		var elem = document.getElementById( d.location );
