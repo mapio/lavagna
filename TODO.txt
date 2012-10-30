@@ -1,2 +1,3 @@
 * adopt Twitter Bootstrap
-* check that eids are sorted as numbers but are strings
+* make the abort http error codes obey the standard code definition
+* lavagna.term should write the payload via http, not directly to the redis socket
