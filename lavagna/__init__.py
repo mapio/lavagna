@@ -20,8 +20,8 @@ from ConfigParser import RawConfigParser
 from functools import wraps
 from json import dumps
 
-from flask import Flask, render_template, request, Response, abort, session, redirect, url_for, g
 from jinja2.exceptions import TemplateNotFound
+from flask import Flask, render_template, request, Response, abort, session, redirect, url_for, g
 
 import db
 
@@ -65,6 +65,13 @@ def stream( stream ):
 				yield 'data: {0}\n'.format( line )
 			yield '\n'
 	return Response( event_stream(), mimetype = 'text/event-stream' )
+
+# Event endpoint
+
+@app.route( '/event/<eid>' )
+def event( eid ):
+	e = db.events( [ eid ] )[ 0 ]
+	return Response( str( e ), mimetype = 'text/plain' )
 
 # Student's endpoints
 
@@ -161,7 +168,7 @@ def teacher( rooms = 'guests' ):
 		abort( 404 )
 	return render_template( 'teacher.html', rooms = ' '.join( t ) )
 
-# Terminal experiments
+# Terminal endpoint
 
 @app.route( '/term' )
 def term():

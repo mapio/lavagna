@@ -19,6 +19,8 @@ from cgi import escape
 from json import dumps, loads
 from datetime import datetime
 
+from flask import url_for
+from prowlpy import Prowl
 from redis import StrictRedis
 
 red = StrictRedis( unix_socket_path = './data/redis.sock' )
@@ -61,6 +63,12 @@ def publish( data ):
 	elif event == 'question':
 		location = data[ 'location' ]
 		red.sadd( 'questions:{0}'.format( location ), eid )
+		if publish.prowl: 
+			publish.prowl( 
+				'Lavagna', 
+				'Question', 
+				'{0}: {1}'.format( location, data[ 'question' ] ), 1, url = url_for( 'event', eid = eid, _external = True ) 
+			)
 	elif event == 'clear_questions':
 		location = data[ 'location' ]
 		red.delete( 'questions:{0}'.format( location ) )
@@ -68,6 +76,7 @@ def publish( data ):
 		location = data[ 'location' ]
 		red.sadd( 'answers:{0}'.format( location ), eid )
 	else: raise RuntimeError( 'Unknown event: {0}'.format( event ) )
+publish.prowl = Prowl( secret( 'prowl' ) ).post if secret( 'prowl' ) else None
 
 def retrieve( stream, location = None ):
 	if stream == 'student':

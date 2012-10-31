@@ -1,3 +1,5 @@
 * adopt Twitter Bootstrap
 * make the abort http error codes obey the standard code definition
 * lavagna.term should write the payload via http, not directly to the redis socket
+* investigate if gunicorn can actually be dropped in favor of gevent
+* use https://gist.github.com/1803641 as inspiration for: count connected people (server side), check connection (client side)
