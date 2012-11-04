@@ -1,21 +1,21 @@
 # Copyright (C) 2012 Massimo Santini <massimo.santini@unimi.it>
 #
 # This file is part of Lavagna.
-# 
+#
 # Lavagna is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Lavagna is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Lavagna.  If not, see <http://www.gnu.org/licenses/>.
 
-from json import dumps, loads
+from json import loads
 
 from redis import StrictRedis
 
@@ -26,11 +26,11 @@ red = StrictRedis( unix_socket_path = './data/redis.sock' )
 def check( eid, event = None, location = None ):
 	eid = int( eid )
 	data = loads( events( [ eid ] )[ 0 ] )
-	if ( data[ 'eid' ] == eid and 
+	if ( data[ 'eid' ] == eid and
 		( ( event and data[ 'event' ] == event ) or not event ) and
 		( ( location and data[ 'location' ] == location ) or not location ) ):
 		del data[ 'eid' ]
-		event = data[ 'event' ] 
+		event = data[ 'event' ]
 		del data[ 'event' ]
 		now = data[ 'now' ]
 		del data[ 'now' ]
@@ -39,7 +39,7 @@ def check( eid, event = None, location = None ):
 		return '\t'.join( map( str, [ eid, now, event, location, data ] ) )
 	else:
 		return eid, None
-	
+
 def check_active( event ):
 	for key in red.keys( '{0}:*'.format( event ) ):
 		fevent, flocation = key.split( ':' )

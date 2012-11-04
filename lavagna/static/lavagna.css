@@ -41,17 +41,17 @@ body {
 	font-size: 70%;
 }
 
-#maps td { 
+#maps td {
 	background-color: silver;
 	border: none;
 	border-radius: 5px;
-	width: 2em; 
+	width: 2em;
 }
 
-#maps td.spacing { 
+#maps td.spacing {
 	background-color: white;
-	border: none; 
-	width: 1em; 
+	border: none;
+	width: 1em;
 }
 
 #maps legend {

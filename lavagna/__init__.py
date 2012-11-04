@@ -1,24 +1,21 @@
 # Copyright (C) 2012 Massimo Santini <massimo.santini@unimi.it>
 #
 # This file is part of Lavagna.
-# 
+#
 # Lavagna is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Lavagna is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Lavagna.  If not, see <http://www.gnu.org/licenses/>.
 
-from cgi import escape 
-from ConfigParser import RawConfigParser
 from functools import wraps
-from json import dumps
 
 from jinja2.exceptions import TemplateNotFound
 from flask import Flask, render_template, request, Response, abort, session, redirect, url_for, g
@@ -27,8 +24,9 @@ import db
 
 app = Flask( __name__ )
 app.config.update(
-	DEBUG = True, TESTING = True,
-    SECRET_KEY = db.secret( 'application' ),
+	DEBUG = True,
+	TESTING = True,
+	SECRET_KEY = db.secret( 'application' ),
 	SECRET_TEACHER = db.secret( 'teacher' ),
 	SECRET_STUDENTS = db.secret( 'students' ),
 	SESSION_COOKIE_HTTPONLY = False,
@@ -83,7 +81,7 @@ def student_required( view ):
 	return _view
 
 @app.route( '/login/<student>/<location>/<secret>', methods = [ 'GET' ] )
-@app.route( '/login', methods = [ 'GET', 'POST' ] )	
+@app.route( '/login', methods = [ 'GET', 'POST' ] )
 def student_login( student = None, location = None, secret = None ):
 	if request.method == 'POST':
 		f = request.form
@@ -122,7 +120,7 @@ def teacher_required( view ):
 	return _view
 
 @app.route( '/t/login/<secret>', methods = [ 'GET' ] )
-@app.route( '/t/login', methods = [ 'GET', 'POST' ] )	
+@app.route( '/t/login', methods = [ 'GET', 'POST' ] )
 def teacher_login( secret = None ):
 	if request.method == 'POST':
 		f = request.form
