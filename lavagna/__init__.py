@@ -150,7 +150,7 @@ def clear_questions():
 	db.clear_questions( request.form[ 'location' ] )
 	return ''
 
-@app.route( '/t/logout/<location>')
+@app.route( '/t/logout/<location>' )
 @teacher_required
 def student_logout( location ):
 	db.logout( location )
