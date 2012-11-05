@@ -1,7 +1,18 @@
 {% extends "layout.html" %}
 {% block script %}
+
+var current_status = null;
+
+function update_status( open ) {
+	current_status.style.background = open ? 'white' : 'red';
+	current_status.innerHTML = open ? 'connected' : 'disconnected - trying to reconnect…';
+}
+
 $( document ).ready( function () {
+	current_status = document.getElementById( 'current_status' );
 	var source = new EventSource( '{{ url_for( 'stream', stream = 'student' ) }}' );
+	source.onopen = function ( e ) { update_status( true ); };
+	source.onerror = function ( e ) { update_status( false ); };
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
 		if ( d.location == '*' )
@@ -29,11 +40,11 @@ $( document ).ready( function () {
 } );
 {% endblock %}
 {% block body %}
-	<p>Student: <b>{{ g.student }}</b> @ <b>{{ g.location }}</b>.</p>
+	<p>Student: <b>{{ g.student }}</b> @ <b>{{ g.location }}</b>, Status: <span id="current_status"></span>.</p>
 	<p>Question: <input id="question" size=120/></p>
 	<p id="answers">Answers:</p>
 {% endblock %}
-<!-- 
+<!--
 Copyright (C) 2012 Massimo Santini <massimo.santini@unimi.it>
 
 This file is part of Lavagna.
@@ -44,10 +55,10 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 Lavagna is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty 
+but WITHOUT ANY WARRANTY; without even the implied warranty
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with Lavagna.  If not, see <http://www.gnu.org/licenses/>.
 -->

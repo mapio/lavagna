@@ -6,6 +6,7 @@ var questions = new Object();
 var location_student = null;
 var location_location = null;
 var tooltip = null;
+var current_status = null;
 
 function set_location( student, location ) {
 	location_student.value = student;
@@ -20,9 +21,15 @@ function set_tooltip( id ) {
 	return true;
 }
 
+function update_status( open ) {
+	current_status.style.background = open ? 'white' : 'red';
+	current_status.innerHTML = open ? 'connected' : 'disconnected - trying to reconnect…';
+}
+
 $( document ).ready( function () {
 
 	tooltip = document.getElementById( 'tooltip' );
+	current_status = document.getElementById( 'current_status' );
 	location_student = document.getElementById( 'location_student' );
 	set_location( '*', '*' );
 
@@ -35,7 +42,7 @@ $( document ).ready( function () {
 			event.stopPropagation();
 	  }
 	 });
- 
+
 	$( 'td[id]' ).mousemove( function ( event ) {
 		var id = $( this )[ 0 ].id;
 		if ( set_tooltip( id ) ) $( tooltip ).css( {
@@ -44,8 +51,10 @@ $( document ).ready( function () {
 		} ).show();
 	} );
 	$( 'td[id]' ).mouseleave( function () { $( tooltip ).hide(); } );
-	
+
 	var source = new EventSource( '{{ url_for( 'stream', stream = 'teacher' ) }}' );
+	source.onopen = function ( e ) { update_status( true ); };
+	source.onerror = function ( e ) { update_status( false ); };
 	source.onmessage = function( e ) {
 		var d = JSON.parse( e.data );
 		var elem = document.getElementById( d.location );
@@ -93,12 +102,12 @@ $( document ).ready( function () {
 		<option selected>text</option>
 		<option>code</option>
 		<option>html</option>
-	</select>
+	</select>, Status: <span id="current_status"></span>.
 	<br/><textarea rows=20 cols=120 id="answer"></textarea>
 </form>
 
 {% endblock %}
-<!-- 
+<!--
 Copyright (C) 2012 Massimo Santini <massimo.santini@unimi.it>
 
 This file is part of Lavagna.
@@ -109,10 +118,10 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 Lavagna is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty 
+but WITHOUT ANY WARRANTY; without even the implied warranty
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with Lavagna.  If not, see <http://www.gnu.org/licenses/>.
 -->
