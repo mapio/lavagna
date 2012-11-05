@@ -62,7 +62,7 @@ def stream( stream ):
 			for line in data.split( '\n' ):
 				yield 'data: {0}\n'.format( line )
 			yield '\n'
-	return Response( event_stream(), mimetype = 'text/event-stream' )
+	return Response( event_stream(), mimetype = 'text/event-stream', headers = { 'Cache-Control': 'no-cache' } )
 
 # Event endpoint
 
