@@ -26,12 +26,26 @@ function update_status( open ) {
 	current_status.innerHTML = open ? 'connected' : 'disconnected - trying to reconnect…';
 }
 
+function paste_handler( event ) {
+	var items = event.clipboardData.items;
+	if ( ! /^image\/.*$/.exec( items[ 0 ].type ) ) return;
+	var blob = items[ 0 ].getAsFile();
+	var reader = new FileReader();
+	reader.onload = function( event ) {
+		$.post( '{{ url_for( 'answer' ) }}', { 'answer': event.target.result, 'kind': 'image', 'location': location_location } );
+		console.log( event.target.result );
+	};
+	reader.readAsDataURL( blob );
+}
+
 $( document ).ready( function () {
 
 	tooltip = document.getElementById( 'tooltip' );
 	current_status = document.getElementById( 'current_status' );
 	location_student = document.getElementById( 'location_student' );
 	set_location( '*', '*' );
+
+	document.onpaste = paste_handler;
 
 	$('textarea').keyup( function ( event ) {
 		if ( event.keyCode == 13 && event.shiftKey ) {
@@ -52,7 +66,7 @@ $( document ).ready( function () {
 	} );
 	$( 'td[id]' ).mouseleave( function () { $( tooltip ).hide(); } );
 
-	var source = new EventSource( '{{ url_for( 'stream', stream = 'teacher' ) }}' );
+	var source = new Object(); // new EventSource( '{{ url_for( 'stream', stream = 'teacher' ) }}' );
 	source.onopen = function ( e ) { update_status( true ); };
 	source.onerror = function ( e ) { update_status( false ); };
 	source.onmessage = function( e ) {

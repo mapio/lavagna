@@ -25,6 +25,8 @@ $( document ).ready( function () {
 			content += '<pre style="white-space: pre-wrap;">' + d.answer + '</pre>';
 		else if ( d.kind == 'code' )
 			content += '<pre class="pp">' + d.answer + '</pre>';
+		else if ( d.kind == 'image' )
+			content += '<img src="' + d.answer + '">';
 		else content += d.answer;
 		content += '</fieldset>';
 		$( '#answers' ).after( content );
