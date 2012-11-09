@@ -41,7 +41,7 @@ $( document ).ready( function () {
 {% endblock %}
 {% block body %}
 	<p>Student: <b>{{ g.student }}</b> @ <b>{{ g.location }}</b>, Status: <span id="current_status"></span>.</p>
-	<p>Question: <input id="question" size=120/></p>
+	<p>Student:  <input id="question" size=120/>, <a href="{{ url_for( 'term' ) }}">Open terminal mirror</a></p>
 	<p id="answers">Answers:</p>
 {% endblock %}
 <!--
