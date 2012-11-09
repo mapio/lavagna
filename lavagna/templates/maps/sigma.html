@@ -3,9 +3,12 @@
 {%- block name -%}Sigma{%- endblock -%}
 
 {%- block map -%}
-	{%- for col in range( 1, 5 ) -%}{{ seat( 'pcs14-0' ~ col ) }}{%- endfor -%}
-	{%- for col in range( 5 ) -%}{{ space() }}{%- endfor -%}
-	{%- for row in range( 13, 0, -2 ) -%}
+	{%- for row in range( 14, 12, -1 ) -%}
+		<tr>
+		{%- for col in range( 1, 5 ) -%}{{ seat( 'pcs' ~ row ~ '-0' ~ col ) }}{%- endfor -%}
+		{%- for col in range( 5 ) -%}{{ space() }}{%- endfor -%}
+	{%- endfor -%}
+	{%- for row in range( 11, 0, -2 ) -%}
 		<tr>
 		{%- for col in range( 1, 5 ) -%}{{ seat( 'pcs' ~ row ~ '-0' ~ col ) }}{%- endfor -%}
 		{{ space() }}
