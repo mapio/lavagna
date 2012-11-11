@@ -44,8 +44,10 @@ def publish( data ):
 	event = data[ 'event' ]
 	if event == 'answer':
 		red.publish( 'stream:student', jdata )
-	else:
+	elif event == 'teacher':
 		red.publish( 'stream:teacher', jdata )
+	elif event == 'term':
+		red.publish( 'stream:term', jdata )
 	if event == 'login':
 		student, location = data[ 'student' ], data[ 'location' ]
 		red.sadd( 'logins:*', eid )
@@ -74,11 +76,13 @@ def publish( data ):
 	elif event == 'answer':
 		location = data[ 'location' ]
 		red.sadd( 'answers:{0}'.format( location ), eid )
+	elif event == 'term':
+		pass
 	else: raise RuntimeError( 'Unknown event: {0}'.format( event ) )
 publish.prowl = Prowl( secret( 'prowl' ) ).post if secret( 'prowl' ) else None
 
 def retrieve( stream, location = None ):
-	if stream == 'student':
+	if stream == 'student': # should we raise an error if location is None here?
 		broadcasted = red.smembers( 'answers:*' )
 		private = red.smembers( 'answers:{0}'.format( location ) )
 		for event in events( sorted( map( int, broadcasted | private ) ) ):
@@ -144,4 +148,10 @@ def answer( answer, kind, location ):
 		'location': location,
 		'answer': answer,
 		'kind': kind
+	} )
+
+def term( payload ):
+	publish( {
+		'event': 'term',
+		'payload': payload
 	} )

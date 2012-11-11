@@ -176,6 +176,14 @@ def teacher( rooms = 'guests' ):
 def term():
 	return render_template( 'term.html' )
 
+@app.route( '/term', methods = [ 'POST' ] )
+@teacher_required
+def term_post():
+	print request.json
+	if not request.json or not 'payload' in request.json: abort( 500 )
+	db.term( request.json[ 'payload' ] )
+	return ''
+
 if __name__ == '__main__':
 	app.debug = True
 	app.run( port = 8000 )
