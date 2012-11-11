@@ -21,13 +21,17 @@ packages listed in `requirements.txt`), then issue the following commands:
 ```bash
 
 	./bin/redis start
-	./bin/set_secrets 
+	./bin/set_secrets
 	./bin/gunicorn start
 	./bin/tlogin localhost:8000
 	./bin/login 'Test student' guest-0 localhost:8000
 ```
 
-## Screenshot
+Lavagna supports terminal broadcasting (full XTerm support thanks to
+[tty.js](https://github.com/chjj/tty.js/)) and pasting of image messages (via
+[Clipboard API](http://dev.w3.org/2006/webapi/clipops/clipops.html)).
+
+## Screenshots
 
 This is the teacher view of a "Guest" classroom where a student as posed a question:
 
@@ -38,3 +42,7 @@ one is the private answer to his question:
 
 ![Student view](https://raw.github.com/mapio/lavagna/master/screenshots/student.png)
 
+Finally, an example of terminal broadcasting: the back window is a terminal showing the
+exact same content of the terminal running in the front window.
+
+![Terminal broadcasting](https://raw.github.com/mapio/lavagna/master/screenshots/term.png)

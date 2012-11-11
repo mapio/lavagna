@@ -66,7 +66,7 @@ $( document ).ready( function () {
 	} );
 	$( 'td[id]' ).mouseleave( function () { $( tooltip ).hide(); } );
 
-	var source = new Object(); // new EventSource( '{{ url_for( 'stream', stream = 'teacher' ) }}' );
+	var source = new EventSource( '{{ url_for( 'stream', stream = 'teacher' ) }}' );
 	source.onopen = function ( e ) { update_status( true ); };
 	source.onerror = function ( e ) { update_status( false ); };
 	source.onmessage = function( e ) {
