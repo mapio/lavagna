@@ -15,6 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with Lavagna.  If not, see <http://www.gnu.org/licenses/>.
 
+
+# The DB contains the follwing keys:
+#
+# secret:students
+# secret:teacher
+# secret-prowl
+#	the secrets used to authenitcate the clients of this app
+#
+# events:id
+# 	a counter contaning the number of the last seen event
+# events:id:<id>
+# 	a json-encoded version of the <id> event
+#
+# logins:*
+# 	a set of loing events <id>s
+# login:<location>
+#	the name of the student currently logged in at <location>
+# questions:<location>
+#	a set of question events <id>s posted at <locaiton> by the currently logged in student
+# answers:<location>
+#	a set of answer event <id>s addressed to <location> ('*' is used for broadcast answers)
+#
+# Moreover, the following pub/sub channels are active
+#
+# stream:student
+# stream:teacher
+# stream:term
+
+
 from json import dumps, loads
 from datetime import datetime
 
