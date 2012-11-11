@@ -41,8 +41,11 @@ def before_request():
 		if not ( g.location and g.student ):
 			del session[ 'location' ]
 			g.location, g.student = None, None
-	if 'secret' in session:
-		g.teacher = session[ 'secret' ] == app.config[ 'SECRET_TEACHER' ]
+	secret = None
+	if 'secret' in session: secret = session[ 'secret' ]
+	elif request.method == 'POST' and 'secret' in request.form: secret = request.form[ 'secret' ]
+	elif request.json and 'secret' in request.json: secret = request.json[ 'secret' ]
+	if secret: g.teacher = secret == app.config[ 'SECRET_TEACHER' ]
 
 # SSE endpoint
 
@@ -50,12 +53,12 @@ def before_request():
 def stream( stream ):
 	location = None
 	if stream == 'teacher':
-		if not 'secret' in session: abort( 500 )
+		if not g.teacher: abort( 403 )
 	elif stream == 'student':
-		if not 'location' in session: abort( 500 )
-		else: location = session[ 'location' ]
+		if not g.student: abort( 403 )
+		else: location = g.location
 	elif stream == 'term':
-		pass
+		if not ( g.student or g.teacher ): abort( 403 )
 	else: abort( 500 )
 	def event_stream():
 		for data in db.retrieve( stream, location ):
@@ -66,17 +69,17 @@ def stream( stream ):
 
 # Event endpoint
 
-@app.route( '/event/<eid>' )
+@app.route( '/event/<eid>' ) # we must secrure this shomehow...
 def event( eid ):
 	e = db.events( [ eid ] )[ 0 ]
-	return Response( str( e ), mimetype = 'text/plain' )
+	return Response( str( e ), mimetype = 'application/json' )
 
 # Student's endpoints
 
-def student_required( view ):
+def student_required( view ): # teacher => student
 	@wraps( view )
 	def _view( *args, **kwargs ):
-		if not g.location: return redirect( url_for( 'student_login' ) )
+		if not ( g.location or g.teacher ): return redirect( url_for( 'student_login' ) )
 		return view( *args, **kwargs )
 	return _view
 
@@ -169,6 +172,7 @@ def teacher( rooms = 'guests' ):
 # Terminal endpoint
 
 @app.route( '/term' )
+@student_required
 def term():
 	return render_template( 'term.html' )
 
