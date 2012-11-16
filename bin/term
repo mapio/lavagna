@@ -23,24 +23,27 @@ from pty import spawn
 from sys import argv
 from urllib2 import Request, urlopen
 
-secret = open( './data/secret.teacher' ).read().strip()
-host = argv[ 1 ] if len( argv ) == 2 else 'hal.silab.di.unimi.it:8000'
+secret = argv[ 1 ] if len( argv ) >= 2 else open( './data/secret.teacher' ).read().strip()
+host = argv[ 2 ] if len( argv ) == 3 else 'hal.silab.di.unimi.it:8000'
 url = 'http://{0}/term'.format( host )
 
 
 import logging
-logging.basicConfig( filename = 'term.log', level = logging.DEBUG, format='%(asctime)s %(message)s' )
+logging.basicConfig( filename = './data/term.log', level = logging.DEBUG, format='%(asctime)s %(message)s' )
 
 def read( fd ):
-	data = osread( fd, 1024 )
-	jdata = dumps( dict( secret = secret, payload = data ) )
 	try:
+		data = osread( fd, 1024 )
+	except:
+		logging.exception( '[read] got an exception while reading from pty' )
+	try:
+		jdata = dumps( dict( secret = secret, payload = data ) )
 		req = Request( url, jdata, { 'Content-Type': 'application/json', 'Content-Length': len( jdata ) } )
 		f = urlopen( req )
 		f.read()
 		f.close()
 	except:
-		logging.exception( 'read' )
+		logging.exception( '[read] got an exception while talking to server' )
 	return data
 
 if __name__ == '__main__':
@@ -48,8 +51,10 @@ if __name__ == '__main__':
 	while torun:
 		try:
 			torun = False
+			print "Staring to broadcast terminal..."
 			spawn( 'bash', read )
-			logging.info( 'spawn exit normally' )
+			print "Broadcasting terminal ended."
+			logging.info( '[spawn] normal exit' )
 		except:
-			logging.exception( 'spawn' )
+			logging.exception( '[spawn] got an exception' )
 			torun = True

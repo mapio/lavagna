@@ -2,3 +2,4 @@
 * make the abort http error codes obey the standard code definition
 * investigate if gunicorn can actually be dropped in favor of gevent
 * use https://gist.github.com/1803641 as inspiration for: count connected people (server side).
+* move data/secret.* to ~/.lavagna_rc to make login/term scripts under bin more "distributable"
