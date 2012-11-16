@@ -49,6 +49,7 @@ if __name__ == '__main__':
 		try:
 			torun = False
 			spawn( 'bash', read )
+			logging.info( 'spawn exit normally' )
 		except:
 			logging.exception( 'spawn' )
 			torun = True
