@@ -73,10 +73,10 @@ def publish( data ):
 	event = data[ 'event' ]
 	if event == 'answer':
 		red.publish( 'stream:student', jdata )
-	elif event == 'teacher':
-		red.publish( 'stream:teacher', jdata )
 	elif event == 'term':
 		red.publish( 'stream:term', jdata )
+	else:
+		red.publish( 'stream:teacher', jdata )
 	if event == 'login':
 		student, location = data[ 'student' ], data[ 'location' ]
 		red.sadd( 'logins:*', eid )
