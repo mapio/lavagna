@@ -64,6 +64,9 @@ def events( eids ):
 	if keys: return red.mget( *keys )
 	return []
 
+def push( stream, data ):
+	red.publish( 'stream:{0}'.format( stream ), data )
+
 def publish( data ):
 	eid = red.incr( 'events:id' )
 	data[ 'eid' ] = eid
@@ -71,12 +74,8 @@ def publish( data ):
 	jdata = dumps( data )
 	red.set( 'events:id:{0}'.format( eid ), jdata )
 	event = data[ 'event' ]
-	if event == 'answer':
-		red.publish( 'stream:student', jdata )
-	elif event == 'term':
-		red.publish( 'stream:term', jdata )
-	else:
-		red.publish( 'stream:teacher', jdata )
+	if event == 'answer': push( 'student', jdata )
+	else: push( 'teacher', jdata )
 	if event == 'login':
 		student, location = data[ 'student' ], data[ 'location' ]
 		red.sadd( 'logins:*', eid )
@@ -105,10 +104,15 @@ def publish( data ):
 	elif event == 'answer':
 		location = data[ 'location' ]
 		red.sadd( 'answers:{0}'.format( location ), eid )
-	elif event == 'term':
-		pass
 	else: raise RuntimeError( 'Unknown event: {0}'.format( event ) )
 publish.prowl = Prowl( secret( 'prowl' ) ).post if secret( 'prowl' ) else None
+
+def follow( stream ):
+	pubsub = red.pubsub()
+	pubsub.subscribe( 'stream:{0}'.format( stream ) )
+	for message in pubsub.listen():
+		if message[ 'type' ] != 'message': continue
+		yield message[ 'data' ]
 
 def retrieve( stream, location = None ):
 	if stream == 'student': # should we raise an error if location is None here?
@@ -124,14 +128,8 @@ def retrieve( stream, location = None ):
 			yield event
 		for event in events( sorted( map( int, questions ) ) ):
 			yield event
-	elif stream == 'term':
-		pass
 	else: raise RuntimeError( 'Unknown stream: {0}'.format( stream ) )
-	pubsub = red.pubsub()
-	pubsub.subscribe( 'stream:{0}'.format( stream ) )
-	for message in pubsub.listen():
-		if message[ 'type' ] != 'message': continue
-		yield message[ 'data' ]
+	for event in follow( stream ): yield event
 
 def logged( location ):
 	eid = red.get( 'login:{0}'.format( location ) )
@@ -180,7 +178,4 @@ def answer( answer, kind, location ):
 	} )
 
 def term( payload ):
-	publish( {
-		'event': 'term',
-		'payload': payload
-	} )
+	push( 'term', payload )

@@ -44,7 +44,6 @@ def before_request():
 	secret = None
 	if 'secret' in session: secret = session[ 'secret' ]
 	elif request.method == 'POST' and 'secret' in request.form: secret = request.form[ 'secret' ]
-	elif request.json and 'secret' in request.json: secret = request.json[ 'secret' ]
 	if secret: g.teacher = secret == app.config[ 'SECRET_TEACHER' ]
 
 # SSE endpoint
@@ -62,6 +61,29 @@ def stream( stream ):
 	else: abort( 500 )
 	def event_stream():
 		for data in db.retrieve( stream, location ):
+			for line in data.split( '\n' ):
+				yield 'data: {0}\n'.format( line )
+			yield '\n'
+	return Response( event_stream(), mimetype = 'text/event-stream', headers = { 'Cache-Control': 'no-cache' } )
+
+# Terminal endpoint
+
+@app.route( '/term' )
+def term():
+	if not ( g.student or g.teacher ): abort( 403 )
+	return render_template( 'term.html' )
+
+@app.route( '/term/data/<secret>', methods = [ 'POST' ] )
+def term_receive( secret ):
+	if not secret == app.config[ 'SECRET_TEACHER' ]: abort( 403 )
+	db.term( request.data )
+	return ''
+
+@app.route( '/term/data' )
+def term_send():
+	if not ( g.student or g.teacher ): abort( 403 )
+	def event_stream():
+		for data in db.follow( 'term' ):
 			for line in data.split( '\n' ):
 				yield 'data: {0}\n'.format( line )
 			yield '\n'
@@ -169,20 +191,6 @@ def teacher( rooms = 'guests' ):
 		abort( 404 )
 	return render_template( 'teacher.html', rooms = ' '.join( t ) )
 
-# Terminal endpoint
-
-@app.route( '/term' )
-@student_required
-def term():
-	return render_template( 'term.html' )
-
-@app.route( '/term', methods = [ 'POST' ] )
-@teacher_required
-def term_post():
-	print request.json
-	if not request.json or not 'payload' in request.json: abort( 500 )
-	db.term( request.json[ 'payload' ] )
-	return ''
 
 if __name__ == '__main__':
 	app.debug = True

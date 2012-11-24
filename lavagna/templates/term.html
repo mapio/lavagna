@@ -20,10 +20,7 @@ $( document ).ready( function () {
   Terminal.defaultColors.fg = 'black';
 	term = new Terminal( 132, 48 );
 	term.open();
-	var source = new EventSource( '{{ url_for( 'stream', stream = 'term' ) }}' );
-	source.onmessage = function( e ) {
-		var d = JSON.parse( e.data );
-		term.write( d[ 'payload' ] );
-	}
+	var source = new EventSource( '{{ url_for( 'term_send' ) }}' );
+	source.onmessage = function( e ) { term.write( atob( e.data ) ); };
 } );
 {% endblock %}
